@@ -10,5 +10,12 @@
 &lt;/SerializableConnectionString&gt;</DesignTimeValue>
       <Value Profile="(Default)">Password=canteen;Persist Security Info=True;User ID=canteen;Initial Catalog=canteen;Data Source=swms22up.gah.local</Value>
     </Setting>
+    <Setting Name="canteenTestConnectionString" Type="(Connection string)" Scope="Application">
+      <DesignTimeValue Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;SerializableConnectionString xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
+  &lt;ConnectionString&gt;Password=canteen;Persist Security Info=True;User ID=canteen;Initial Catalog=CanteenTest;Data Source=swms22up.gah.local&lt;/ConnectionString&gt;
+&lt;/SerializableConnectionString&gt;</DesignTimeValue>
+      <Value Profile="(Default)">Password=canteen;Persist Security Info=True;User ID=canteen;Initial Catalog=CanteenTest;Data Source=swms22up.gah.local</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

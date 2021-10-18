@@ -13,10 +13,10 @@ namespace Canteen
             InitializeComponent();
         }
         private readonly SQL SqlConnection = new SQL();
-        private readonly string QueryUpdateProductionSale = "select typeOperation.name as Тип, date as Дата, dishList.name as Блюдо, quantity as Колличество from ProductionSale " +
+        private readonly string QueryUpdateProductionSale = "select typeOperation.name as Тип, date as Дата, dishList.name as Блюдо, quantity as Колличество, remains as Остатки from ProductionSale " +
             "left join TypeOperation as typeOperation on typeOperation.Id = ProductionSale.type " +
             "left join DishList as dishList on dishList.Id = ProductionSale.dish " +
-            "Order by date desc";
+            "Order by date desc, typeOperation.name asc";
 
 
         private DataTable DataTableProductionSale = new DataTable();

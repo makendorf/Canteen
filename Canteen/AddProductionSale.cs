@@ -30,11 +30,12 @@ namespace Canteen
             "where date = @date and _dish.name like @dishName and type = @type " +
             "order by name";
         private readonly string QueryInsertProductionSale =
-            "insert into ProductionSale (type, date, dish, quantity) values " +
+            "insert into ProductionSale (type, date, dish, quantity, remains) values " +
             "(@typeOperation, " +
             "@date, " +
             "(select top 1 Id from DishList where name like @dishName), " +
-            "@quantity)";
+            "@quantity," +
+            "@remains)";
         private readonly string QueryInsertMovement =
             "insert into Movement (type, date, dish, product, quantity) values " +
             "(@typeOperation, " +
@@ -46,6 +47,15 @@ namespace Canteen
             "select product, norm, prod.category from RecipeList " +
             "left join ProductsList as prod on prod.Id = RecipeList.product " +
             "where dish = (select TOP 1 Id from DishList where name like @dishName) order by RecipeList.product";
+        private readonly string QueryFindSummRemains = "select sum(remains) from ProductionSale " +
+                               $@"where (date = @date or date = @dateLast) and " +
+                               $@"dish = (select top 1 Id from DishList where name like @dishName) and " +
+                               $@"type = @type";
+        private readonly string QueryFindRemains = "select Id, remains, date from ProductionSale " +
+                                $@"where (date = @date or date = @dateLast) and " +
+                                $@"dish = (select top 1 Id from DishList where name like @dishName) and " +
+                                $@"type = @type order by date asc";
+        private readonly string QueryUpdateRemainsForProduction = "update ProductionSale set remains = @remains where Id = @id";
 
         private DataTable DataTableDish = new DataTable();
         private DataTable DataTableAddDish = new DataTable();
@@ -151,7 +161,18 @@ namespace Canteen
                 }
             }
         }
-
+        private int SelectTypeProductionInTypeSale()
+        {
+            if(TypeOperation == 3)
+            {
+                return 1;
+            }
+            else if(TypeOperation == 4)
+            {
+                return 2;
+            }
+            return 0;
+        }
         private void metroButton2_Click(object sender, EventArgs e)
         {
             try
@@ -160,15 +181,149 @@ namespace Canteen
                 for (int i = 0; i < DataTableAddDish.Rows.Count; i++)
                 {
                     var dishName = DataTableAddDish.Rows[i].ItemArray[0];
-                    double quantity = Convert.ToDouble(DataTableAddDish.Rows[i].ItemArray[1]);
-                    SqlConnection.SetSqlParameters(new List<SqlParameter>
+                    var quantity = Convert.ToInt32(DataTableAddDish.Rows[i].ItemArray[1]);
+                    var remainsFact = quantity;
+                    var remainsLastDay = 0;
+                    switch (TypeOperation)
                     {
-                        new SqlParameter("@typeOperation", TypeOperation),
-                        new SqlParameter("@date",  date),
-                        new SqlParameter("@dishName",  dishName),
-                        new SqlParameter("@quantity",  quantity),
-                    });
-                    SqlConnection.ExecuteNonQuery(QueryInsertProductionSale);
+                        case 1: goto case 2;
+                        case 2:
+                            {
+                                SqlConnection.SetSqlParameters(new List<SqlParameter>
+                                {
+                                    new SqlParameter("@typeOperation", TypeOperation),
+                                    new SqlParameter("@date",  date),
+                                    new SqlParameter("@dishName",  dishName),
+                                    new SqlParameter("@quantity",  quantity),
+                                    new SqlParameter("@remains", quantity)
+                                });
+                                SqlConnection.ExecuteNonQuery(QueryInsertProductionSale);
+                                break;
+                            }
+                        case 3: goto case 4;
+                        case 4:
+                            {
+                                var id = 0;
+                                var remains = 0;
+                                var summRemains = 0;
+                                
+                                SqlConnection.SetSqlParameters(new List<SqlParameter>
+                                {
+                                    new SqlParameter("@type", SelectTypeProductionInTypeSale()),
+                                    new SqlParameter("@date",  date),
+                                    new SqlParameter("@dishName",  dishName),
+                                    new SqlParameter("@dateLast",  date.AddDays(-1))
+                                });
+                                using (var readerRemains = SqlConnection.ExecuteQuery(QueryFindSummRemains))
+                                {
+                                    readerRemains.Read();
+                                    summRemains = readerRemains.GetInt32(0);
+                                }
+                                using (var readerRemains = SqlConnection.ExecuteQuery(QueryFindRemains))
+                                {
+                                    if(readerRemains.HasRows)
+                                    {
+                                        while(readerRemains.Read())
+                                        {
+                                            if(summRemains != 0)
+                                            {
+                                                while (true)
+                                                {
+                                                    if (remainsFact > summRemains)
+                                                    {
+                                                        using (var remainsForm = new SelectQuantity())
+                                                        {
+                                                            remainsForm.metroLabel2.Text = "Продажи превышают производство + остаток. Введите другое значение";
+                                                            remainsForm.Text = "Внимание!";
+                                                            if (remainsForm.ShowDialog() == DialogResult.OK)
+                                                            {
+                                                                remainsFact = Convert.ToInt32(remainsForm.ReturnValue);
+                                                            }
+                                                            if(remainsFact <= summRemains)
+                                                            {
+                                                                break;
+                                                            }
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        break;
+                                                    }
+                                                }
+                                                
+                                                id = readerRemains.GetInt32(0);
+                                                remains = readerRemains.GetInt32(1);
+
+                                                remainsFact -= remains;
+
+                                                if(readerRemains.GetDateTime(2).ToShortDateString() == date.AddDays(-1).ToShortDateString())
+                                                {
+                                                    remainsLastDay += remains;
+                                                }
+
+                                                var SqlChangeRemains = new SQL();
+                                                if (remainsFact > 0)
+                                                {
+                                                    
+                                                    SqlChangeRemains.SetSqlParameters(new List<SqlParameter>
+                                                    {
+                                                        new SqlParameter("@id", id),
+                                                        new SqlParameter
+                                                        {
+                                                            IsNullable = false,
+                                                            DbType = DbType.Int64,
+                                                            ParameterName = "@remains",
+                                                            Value = 0
+                                                        }
+                                                    });
+
+                                                }
+                                                else if (remainsFact <= remains)
+                                                {
+                                                    SqlChangeRemains.SetSqlParameters(new List<SqlParameter>
+                                                    {
+                                                        new SqlParameter("@id", id),
+                                                        new SqlParameter
+                                                        {
+                                                            IsNullable = false,
+                                                            DbType = DbType.Int64,
+                                                            ParameterName = "@remains",
+                                                            Value = remains
+                                                        }
+                                                    });
+                                                }
+                                                SqlChangeRemains.ExecuteNonQuery(QueryUpdateRemainsForProduction);
+                                                SqlChangeRemains.Close();
+                                            }
+                                        }
+                                    }
+                                }
+                                remainsFact = Math.Abs(remainsFact);
+                                SqlConnection.SetSqlParameters(new List<SqlParameter>
+                                {
+                                    new SqlParameter("@id", id),
+                                    new SqlParameter
+                                    {
+                                        IsNullable = false,
+                                        DbType = DbType.Int64,
+                                        ParameterName = "@remains",
+                                        Value = remainsFact
+                                    }
+                                });
+                                SqlConnection.ExecuteNonQuery(QueryUpdateRemainsForProduction);
+                                SqlConnection.SetSqlParameters(new List<SqlParameter>
+                                {
+                                    new SqlParameter("@typeOperation", TypeOperation),
+                                    new SqlParameter("@date",  date),
+                                    new SqlParameter("@dishName",  dishName),
+                                    new SqlParameter("@quantity",  quantity),
+                                    new SqlParameter("@remains", remainsFact)
+                                });
+                                SqlConnection.ExecuteNonQuery(QueryInsertProductionSale);
+                                break;
+                            }
+                            
+                    }
 
                     var SqlConnProduct = new SQL();
                     SqlConnProduct.SetSqlParameters(new List<SqlParameter>
@@ -184,77 +339,35 @@ namespace Canteen
                                 var SqlConnMove = new SQL();
                                 var productId = reader.GetInt32(0);
                                 var category = reader.GetInt32(2);
-                                dynamic quantityKg;
+                                dynamic quantityKg = 0;
                                 switch (category)
                                 {
                                     case 10008:
                                         {
-                                            quantityKg = Math.Round(quantity, 3);
-                                            break;
-                                        }
-                                    default:
-                                        {
-                                            quantityKg = Math.Round(reader.GetDouble(1) * quantity, 3);
-                                            break;
-                                        }
-                                }
-                                switch (category)
-                                {
-                                    case 10008:
-                                        {
-                                            quantityKg = Math.Round(quantity, 3);
+                                            quantityKg = quantity;
                                             break;
                                         }
                                     default:
                                         {
                                             switch (TypeOperation)
                                             {
-                                                case 1:
+                                                case 1: goto case 2;
                                                 case 2:
                                                     {
                                                         quantityKg = Math.Round(reader.GetDouble(1) * quantity, 3);
                                                         break;
                                                     }
-                                                case 3:
+                                                case 3: goto case 4;
                                                 case 4:
                                                     {
-                                                        int quantityProductionLastDay = 0;
-                                                        int quantityProductionCurrentDay = 0;
-                                                        using (var readerProductionCurrentDay = new SQL().ExecuteQuery(
-                                                                $@"select sum(quantity) from ProductionSale " +
-                                                                $@"where date = '{date}' and " +
-                                                                $@"dish = (select top 1 Id from DishList where name like {dishName}) and " +
-                                                                $@"type = 2"))
-                                                        {
-                                                            readerProductionCurrentDay.Read();
-                                                            quantityProductionCurrentDay = readerProductionCurrentDay.GetInt32(0);
-                                                            using (var readerProductionLastDay = new SQL().ExecuteQuery(
-                                                                $@"select top 1 " +
-                                                                $@"(select sum(quantity) from ProductionSale " +
-                                                                $@"where date = '{date.AddDays(-1)}' and " +
-                                                                $@"dish = (select top 1 Id from DishList where name like {dishName}) and " +
-                                                                $@"type = 2) - " +
-                                                                $@"(select sum(quantity) from ProductionSale " +
-                                                                $@"where date = '13.10.2021' and " +
-                                                                $@"dish = 10031 and " +
-                                                                $@"type = 4) " +
-                                                                $@"from ProductionSale  "))
-                                                            {
-                                                                if (readerProductionLastDay.HasRows)
-                                                                {
-                                                                    quantityProductionLastDay = readerProductionLastDay.GetInt32(0);
-                                                                    if (quantityProductionLastDay < 0) quantityProductionLastDay = 0;
-                                                                }
-                                                                else quantityProductionLastDay = 0;
-                                                            }
-                                                        }
+                                                        quantityKg = Math.Round(reader.GetDouble(1) * (quantity - remainsLastDay), 3);
                                                         break;
                                                     }
                                             }
                                             break;
                                         }
+                                
                                 }
-
                                 SqlConnMove.SetSqlParameters(new List<SqlParameter>
                                 {
                                     new SqlParameter("@typeOperation", TypeOperation),
@@ -269,12 +382,17 @@ namespace Canteen
                     }
                 }
             }
+            catch(Exception exc)
+            {
+                MessageBox.Show(exc.Message);
+            }
             finally
             {
                 MessageBox.Show("Успешно");
             }
-            
         }
+
+       
 
         private void metroDateTime1_ValueChanged(object sender, EventArgs e)
         {
@@ -287,14 +405,7 @@ namespace Canteen
         {
             switch (TypeOperation)
             {
-                case 1:
-                    {
-                        DataTableDish.Clear();
-                        DataAdapterDish = SqlConnection.QueryForDataAdapter(QuerySearchDishProduction);
-                        DataAdapterDish.SelectCommand.Parameters.AddWithValue("@dishName", $@"%{toolStripTextBox1.Text}%");
-                        DataAdapterDish.Fill(DataTableDish);
-                        break;
-                    }
+                case 1: goto case 2;
                 case 2:
                     {
                         DataTableDish.Clear();
@@ -303,16 +414,7 @@ namespace Canteen
                         DataAdapterDish.Fill(DataTableDish);
                         break;
                     }
-                case 3:
-                    {
-                        var date = metroDateTime1.Value.ToShortDateString();
-                        DataTableDish.Clear();
-                        DataAdapterDish = SqlConnection.QueryForDataAdapter(QuerySearchDishSale);
-                        DataAdapterDish.SelectCommand.Parameters.AddWithValue("@dishName", $@"%{toolStripTextBox1.Text}%");
-                        DataAdapterDish.SelectCommand.Parameters.AddWithValue("@date", date);
-                        DataAdapterDish.Fill(DataTableDish);
-                        break;
-                    }
+                case 3: goto case 4;
                 case 4:
                     {
                         var date = metroDateTime1.Value.ToShortDateString();

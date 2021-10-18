@@ -2,9 +2,9 @@
 (select sum(quantity) from ProductionSale 
 where date = '13.10.2021' and 
 dish = 10031 and 
-type = 2) - 
+type = 4) - 
 (select sum(quantity) from ProductionSale 
 where date = '13.10.2021' and 
 dish = 10031 and 
-type = 4)
+type = 2)
 from ProductionSale 

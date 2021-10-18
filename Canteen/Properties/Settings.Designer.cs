@@ -33,5 +33,16 @@ namespace Canteen.Properties {
                 return ((string)(this["canteenConnectionString"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.ConnectionString)]
+        [global::System.Configuration.DefaultSettingValueAttribute("Password=canteen;Persist Security Info=True;User ID=canteen;Initial Catalog=Cante" +
+            "enTest;Data Source=swms22up.gah.local")]
+        public string canteenTestConnectionString {
+            get {
+                return ((string)(this["canteenTestConnectionString"]));
+            }
+        }
     }
 }
