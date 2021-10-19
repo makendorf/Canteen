@@ -129,6 +129,7 @@ namespace Canteen
                     }
             }
             DataAdapterDish.Fill(DataTableDish);
+            GridViewDishList.Columns[0].Width = 200;
         }
 
         private void GridViewDishList_DoubleClick(object sender, EventArgs e)
@@ -178,6 +179,7 @@ namespace Canteen
             try
             {
                 var date = metroDateTime1.Value;
+                var summRemains = 0;
                 for (int i = 0; i < DataTableAddDish.Rows.Count; i++)
                 {
                     var dishName = DataTableAddDish.Rows[i].ItemArray[0];
@@ -205,7 +207,7 @@ namespace Canteen
                             {
                                 var id = 0;
                                 var remains = 0;
-                                var summRemains = 0;
+                                summRemains = 0;
                                 
                                 SqlConnection.SetSqlParameters(new List<SqlParameter>
                                 {
@@ -227,40 +229,18 @@ namespace Canteen
                                         {
                                             if(summRemains != 0)
                                             {
-                                                while (true)
+                                                if (remainsFact > summRemains)
                                                 {
-                                                    if (remainsFact > summRemains)
-                                                    {
-                                                        using (var remainsForm = new SelectQuantity())
-                                                        {
-                                                            remainsForm.metroLabel2.Text = "Продажи превышают производство + остаток. Введите другое значение";
-                                                            remainsForm.Text = "Внимание!";
-                                                            if (remainsForm.ShowDialog() == DialogResult.OK)
-                                                            {
-                                                                remainsFact = Convert.ToInt32(remainsForm.ReturnValue);
-                                                            }
-                                                            if(remainsFact <= summRemains)
-                                                            {
-                                                                break;
-                                                            }
-                                                        }
-                                                    }
-                                                    else
-                                                    {
-                                                        break;
-                                                    }
+                                                    remainsFact = summRemains;
                                                 }
-                                                
                                                 id = readerRemains.GetInt32(0);
                                                 remains = readerRemains.GetInt32(1);
 
                                                 remainsFact -= remains;
-
-                                                if(readerRemains.GetDateTime(2).ToShortDateString() == date.AddDays(-1).ToShortDateString())
+                                                if (readerRemains.GetDateTime(2).ToShortDateString() == date.AddDays(-1).ToShortDateString())
                                                 {
                                                     remainsLastDay += remains;
                                                 }
-
                                                 var SqlChangeRemains = new SQL();
                                                 if (remainsFact > 0)
                                                 {
@@ -320,11 +300,14 @@ namespace Canteen
                                     new SqlParameter("@remains", remainsFact)
                                 });
                                 SqlConnection.ExecuteNonQuery(QueryInsertProductionSale);
+                                if (quantity > summRemains)
+                                {
+                                    quantity = summRemains;
+                                }
                                 break;
                             }
                             
                     }
-
                     var SqlConnProduct = new SQL();
                     SqlConnProduct.SetSqlParameters(new List<SqlParameter>
                     {

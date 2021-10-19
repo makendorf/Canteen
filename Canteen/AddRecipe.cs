@@ -171,7 +171,13 @@ namespace Canteen
         {
             DataTableProducts.Clear();
             DataAdapterProducts = SqlConnection.QueryForDataAdapter(QuerySearchProduct);
-            DataAdapterProducts.SelectCommand.Parameters.AddWithValue("@name", $@"%{toolStripTextBox1.Text}%");
+            DataAdapterProducts.SelectCommand.Parameters.Add(new SqlParameter
+            {
+                DbType = DbType.String,
+                ParameterName = "@name",
+                Value = $@"%{toolStripTextBox1.Text}%"
+            });
+            //DataAdapterProducts.SelectCommand.Parameters.AddWithValue("@name", $@"%{toolStripTextBox1.Text}%");
             DataAdapterProducts.Fill(DataTableProducts);
             GridViewProductList.Columns[0].Width = 190;
         }

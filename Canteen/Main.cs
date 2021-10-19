@@ -21,7 +21,7 @@ namespace Canteen
                                 "group by typeOper.name, Dish.name, date " +
                                 "order by date desc";
         private readonly string QueryUpdateMovementProductionProduct =
-                                "select prod.name, Round(sum(Movement.quantity), 3) as КГ from Movement " +
+                                "select prod.name as Продукт, Round(sum(Movement.quantity), 3) as КГ from Movement " +
                                 "left join ProductsList as prod on prod.Id = Movement.product " +
                                 "left join DishList as Dish on Dish.Id = Movement.dish " +
                                 "where type = (select top 1 Id from TypeOperation where name like @type) and date = @date and Dish.name like @dishName " +

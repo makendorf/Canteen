@@ -29,8 +29,6 @@ namespace Canteen
         /// </summary>
         private void InitializeComponent()
         {
-            this.metroButton3 = new MetroFramework.Controls.MetroButton();
-            this.metroButton1 = new MetroFramework.Controls.MetroButton();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.GridViewDishList = new System.Windows.Forms.DataGridView();
             this.metroDateTime1 = new MetroFramework.Controls.MetroDateTime();
@@ -42,37 +40,27 @@ namespace Canteen
             this.toolStripTextBox1 = new System.Windows.Forms.ToolStripTextBox();
             this.metroLabel2 = new MetroFramework.Controls.MetroLabel();
             this.metroComboBox1 = new MetroFramework.Controls.MetroComboBox();
+            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.panel1 = new System.Windows.Forms.Panel();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.GridViewDishList)).BeginInit();
             this.metroPanel1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
+            this.splitContainer1.Panel1.SuspendLayout();
+            this.splitContainer1.Panel2.SuspendLayout();
+            this.splitContainer1.SuspendLayout();
+            this.panel1.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // metroButton3
-            // 
-            this.metroButton3.Location = new System.Drawing.Point(217, 325);
-            this.metroButton3.Name = "metroButton3";
-            this.metroButton3.Size = new System.Drawing.Size(29, 26);
-            this.metroButton3.TabIndex = 18;
-            this.metroButton3.Text = "X";
-            this.metroButton3.UseSelectable = true;
-            // 
-            // metroButton1
-            // 
-            this.metroButton1.Location = new System.Drawing.Point(217, 293);
-            this.metroButton1.Name = "metroButton1";
-            this.metroButton1.Size = new System.Drawing.Size(29, 26);
-            this.metroButton1.TabIndex = 17;
-            this.metroButton1.Text = "->";
-            this.metroButton1.UseSelectable = true;
             // 
             // dataGridView1
             // 
             this.dataGridView1.AllowUserToAddRows = false;
             this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView1.Location = new System.Drawing.Point(248, 203);
+            this.dataGridView1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dataGridView1.Location = new System.Drawing.Point(0, 0);
             this.dataGridView1.Name = "dataGridView1";
-            this.dataGridView1.Size = new System.Drawing.Size(213, 292);
+            this.dataGridView1.Size = new System.Drawing.Size(231, 318);
             this.dataGridView1.TabIndex = 16;
             // 
             // GridViewDishList
@@ -80,10 +68,11 @@ namespace Canteen
             this.GridViewDishList.AllowUserToAddRows = false;
             this.GridViewDishList.AllowUserToDeleteRows = false;
             this.GridViewDishList.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.GridViewDishList.Location = new System.Drawing.Point(3, 25);
+            this.GridViewDishList.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.GridViewDishList.Location = new System.Drawing.Point(0, 0);
             this.GridViewDishList.Name = "GridViewDishList";
             this.GridViewDishList.ReadOnly = true;
-            this.GridViewDishList.Size = new System.Drawing.Size(192, 292);
+            this.GridViewDishList.Size = new System.Drawing.Size(216, 287);
             this.GridViewDishList.TabIndex = 15;
             this.GridViewDishList.DoubleClick += new System.EventHandler(this.GridViewDishList_DoubleClick);
             // 
@@ -121,14 +110,15 @@ namespace Canteen
             // 
             // metroPanel1
             // 
+            this.metroPanel1.Controls.Add(this.panel1);
             this.metroPanel1.Controls.Add(this.toolStrip1);
-            this.metroPanel1.Controls.Add(this.GridViewDishList);
+            this.metroPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.metroPanel1.HorizontalScrollbarBarColor = true;
             this.metroPanel1.HorizontalScrollbarHighlightOnWheel = false;
             this.metroPanel1.HorizontalScrollbarSize = 10;
-            this.metroPanel1.Location = new System.Drawing.Point(23, 178);
+            this.metroPanel1.Location = new System.Drawing.Point(0, 0);
             this.metroPanel1.Name = "metroPanel1";
-            this.metroPanel1.Size = new System.Drawing.Size(198, 317);
+            this.metroPanel1.Size = new System.Drawing.Size(221, 318);
             this.metroPanel1.TabIndex = 22;
             this.metroPanel1.VerticalScrollbarBarColor = true;
             this.metroPanel1.VerticalScrollbarHighlightOnWheel = false;
@@ -141,7 +131,7 @@ namespace Canteen
             this.toolStripTextBox1});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(198, 25);
+            this.toolStrip1.Size = new System.Drawing.Size(221, 25);
             this.toolStrip1.TabIndex = 16;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -153,7 +143,6 @@ namespace Canteen
             // 
             // toolStripTextBox1
             // 
-            this.toolStripTextBox1.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.toolStripTextBox1.Name = "toolStripTextBox1";
             this.toolStripTextBox1.Size = new System.Drawing.Size(122, 25);
             this.toolStripTextBox1.TextChanged += new System.EventHandler(this.toolStripTextBox1_TextChanged);
@@ -178,20 +167,47 @@ namespace Canteen
             this.metroComboBox1.UseSelectable = true;
             this.metroComboBox1.SelectedIndexChanged += new System.EventHandler(this.metroComboBox1_SelectedIndexChanged);
             // 
+            // splitContainer1
+            // 
+            this.splitContainer1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.splitContainer1.Location = new System.Drawing.Point(13, 178);
+            this.splitContainer1.Name = "splitContainer1";
+            // 
+            // splitContainer1.Panel1
+            // 
+            this.splitContainer1.Panel1.Controls.Add(this.metroPanel1);
+            // 
+            // splitContainer1.Panel2
+            // 
+            this.splitContainer1.Panel2.Controls.Add(this.dataGridView1);
+            this.splitContainer1.Size = new System.Drawing.Size(456, 318);
+            this.splitContainer1.SplitterDistance = 221;
+            this.splitContainer1.TabIndex = 25;
+            // 
+            // panel1
+            // 
+            this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.panel1.Controls.Add(this.GridViewDishList);
+            this.panel1.Location = new System.Drawing.Point(3, 28);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(216, 287);
+            this.panel1.TabIndex = 17;
+            // 
             // AddProductionSale
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(482, 508);
+            this.Controls.Add(this.splitContainer1);
             this.Controls.Add(this.metroComboBox1);
             this.Controls.Add(this.metroLabel2);
-            this.Controls.Add(this.metroPanel1);
             this.Controls.Add(this.metroButton2);
             this.Controls.Add(this.metroLabel1);
             this.Controls.Add(this.metroDateTime1);
-            this.Controls.Add(this.metroButton3);
-            this.Controls.Add(this.metroButton1);
-            this.Controls.Add(this.dataGridView1);
             this.Name = "AddProductionSale";
             this.Text = "Новое продуктодвижение";
             this.Load += new System.EventHandler(this.AddProduction_Load);
@@ -201,15 +217,17 @@ namespace Canteen
             this.metroPanel1.PerformLayout();
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
+            this.splitContainer1.Panel1.ResumeLayout(false);
+            this.splitContainer1.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
+            this.splitContainer1.ResumeLayout(false);
+            this.panel1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
         }
 
         #endregion
-
-        private MetroFramework.Controls.MetroButton metroButton3;
-        private MetroFramework.Controls.MetroButton metroButton1;
         private System.Windows.Forms.DataGridView dataGridView1;
         private System.Windows.Forms.DataGridView GridViewDishList;
         private MetroFramework.Controls.MetroDateTime metroDateTime1;
@@ -221,5 +239,7 @@ namespace Canteen
         private System.Windows.Forms.ToolStripTextBox toolStripTextBox1;
         private MetroFramework.Controls.MetroLabel metroLabel2;
         private MetroFramework.Controls.MetroComboBox metroComboBox1;
+        private System.Windows.Forms.SplitContainer splitContainer1;
+        private System.Windows.Forms.Panel panel1;
     }
 }
