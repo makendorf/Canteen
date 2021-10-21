@@ -19,7 +19,7 @@ namespace Canteen
         private readonly string QueryFindDish = "select top 1 Id from DishList where name like @dish order by name";
         private readonly string QuerySearchProduct=
                                 "select name as Продукт from ProductsList where name like @name order by name";
-        private readonly DataTable DataTableProducts = new DataTable();
+        private  DataTable DataTableProducts = new DataTable();
         private readonly DataTable DataTableAddProducts = new DataTable();
         private SqlDataAdapter DataAdapterProducts;
         public AddRecipe()
@@ -169,7 +169,8 @@ namespace Canteen
 
         private void toolStripTextBox1_TextChanged(object sender, EventArgs e)
         {
-            DataTableProducts.Clear();
+            DataTableProducts = new DataTable();
+            GridViewProductList.DataSource = new BindingSource(DataTableProducts, null);
             DataAdapterProducts = SqlConnection.QueryForDataAdapter(QuerySearchProduct);
             DataAdapterProducts.SelectCommand.Parameters.Add(new SqlParameter
             {
@@ -177,7 +178,6 @@ namespace Canteen
                 ParameterName = "@name",
                 Value = $@"%{toolStripTextBox1.Text}%"
             });
-            //DataAdapterProducts.SelectCommand.Parameters.AddWithValue("@name", $@"%{toolStripTextBox1.Text}%");
             DataAdapterProducts.Fill(DataTableProducts);
             GridViewProductList.Columns[0].Width = 190;
         }

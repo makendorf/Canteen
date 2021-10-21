@@ -18,8 +18,8 @@ namespace Canteen
         }
         private string GetConnectionString()
         {
-            //var connString = Properties.Settings.Default.canteenConnectionString;
-            var connString = Properties.Settings.Default.canteenTestConnectionString;
+            var connString = Properties.Settings.Default.canteenConnectionString;
+            //var connString = Properties.Settings.Default.canteenTestConnectionString;
             return connString;
         }
         public SqlDataReader ExecuteQuery(string cmd = "")
