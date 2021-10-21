@@ -1,5 +1,4 @@
-﻿using MetroFramework.Forms;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
@@ -80,7 +79,7 @@ namespace Canteen
             {
                 new SqlParameter("@nameDish", nameDish)
             });
-            using(var reader = SqlConnection.ExecuteQuery(QueryUpdateTehnicalCard))
+            using (var reader = SqlConnection.ExecuteQuery(QueryUpdateTehnicalCard))
             {
                 if (reader.HasRows)
                 {
@@ -141,7 +140,7 @@ namespace Canteen
 
         private void metroButton3_Click(object sender, EventArgs e)
         {
-            
+
             var AddRecipe = new AddRecipe();
             AddRecipe.ShowDialog();
             UpdateDataTableRecipe();
@@ -183,7 +182,7 @@ namespace Canteen
         private void DataGridRecipe_CellValueChanged(object sender, DataGridViewCellEventArgs e)
         {
             var cell = DataGridRecipe.SelectedRows[0].Cells[0];
-            
+
             SqlConnection.SetSqlParameters(new List<SqlParameter> {
                 new SqlParameter("@oldName", $@"{DataTableRecipeLast.Rows[cell.RowIndex].ItemArray[0]}%"),
                 new SqlParameter("@newName", $@"{cell.Value}")

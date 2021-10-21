@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Data.SqlClient;
 using System.IO;
 using Excel = Microsoft.Office.Interop.Excel;
@@ -39,8 +38,8 @@ namespace Canteen
         {
             TypeDocument = typeDocument;
             Date = date;
-            Kniga = new Excel.Application() 
-            { 
+            Kniga = new Excel.Application()
+            {
                 Visible = false
             };
             Kniga.Workbooks.Open($@"{Directory.GetCurrentDirectory()}\Resources\Reports\report");
@@ -77,16 +76,16 @@ namespace Canteen
                         break;
                     }
             }
-            
+
 
             List.Cells[3, 1] = "№п/п";
             List.Cells[3, 2] = "Наименование продуктов";
-            
+
             SqlConnection.SetSqlParameters(new List<SqlParameter>
             {
                 new SqlParameter("@date", Date.ToShortDateString()),
                 new SqlParameter("@type", TypeDocument)
-            }) ;
+            });
             using (var reader = SqlConnection.ExecuteQuery(QueryUpdateDishSale))
             {
                 if (reader.HasRows)
@@ -141,16 +140,16 @@ namespace Canteen
                 }
             }
             List.Cells[4, DishList.Count + 3] = "Итого, кг";
-            SqlConnection.SetSqlParameters(new List<SqlParameter> 
-            { 
+            SqlConnection.SetSqlParameters(new List<SqlParameter>
+            {
                 new SqlParameter("@date", Date),
                 new SqlParameter("@type", TypeDocument)
             });
-            using(var reader = SqlConnection.ExecuteQuery(QueryFullQuantityProduct))
+            using (var reader = SqlConnection.ExecuteQuery(QueryFullQuantityProduct))
             {
                 if (reader.HasRows)
                 {
-                    for(int i = 5; reader.Read(); i++)
+                    for (int i = 5; reader.Read(); i++)
                     {
                         List.Cells[i, DishList.Count + 3] = reader.GetDouble(0);
                     }
@@ -190,14 +189,14 @@ namespace Canteen
             Range.Merge();
             Range.HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter;
             //сами блюда
-            for(int i = 3; i <= DishList.Count + 2; i++)
+            for (int i = 3; i <= DishList.Count + 2; i++)
             {
                 Range = GetRange(List.Cells[4, i], List.Cells[4, i]);
                 Range.EntireColumn.ColumnWidth = 100;
                 Range.EntireColumn.AutoFit();
                 Range.EntireRow.AutoFit();
                 Range.VerticalAlignment = Excel.XlHAlign.xlHAlignCenter;
-                
+
             }
 
             //наименование блюда
@@ -243,13 +242,13 @@ namespace Canteen
         public void SaveDocument()
         {
             string TypeName = "";
-            using(var reader = SqlConnection.ExecuteQuery($@"select name from TypeOperation where Id = {TypeDocument}"))
+            using (var reader = SqlConnection.ExecuteQuery($@"select name from TypeOperation where Id = {TypeDocument}"))
             {
                 reader.Read();
                 TypeName = reader.GetString(0);
             }
             Kniga.Application.ActiveWorkbook.SaveAs(
-                $@"{Directory.GetCurrentDirectory()}\Resources\Reports\{Date.ToShortDateString()} {TypeName}.xlsx", 
+                $@"{Directory.GetCurrentDirectory()}\Resources\Reports\{Date.ToShortDateString()} {TypeName}.xlsx",
                 System.Type.Missing, System.Type.Missing, System.Type.Missing, System.Type.Missing,
                 System.Type.Missing, Excel.XlSaveAsAccessMode.xlNoChange, System.Type.Missing, System.Type.Missing,
                 System.Type.Missing, System.Type.Missing, System.Type.Missing);
@@ -272,7 +271,7 @@ namespace Canteen
                 System.Runtime.InteropServices.Marshal.ReleaseComObject(Range);
                 Range = null;
             }
-            
+
             GC.Collect();
         }
     }

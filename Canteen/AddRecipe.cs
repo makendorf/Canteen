@@ -17,9 +17,9 @@ namespace Canteen
             "@norm)";
         private readonly string QueryInsertDish = "insert into DishList (name, [commit]) values (@name, @commit)";
         private readonly string QueryFindDish = "select top 1 Id from DishList where name like @dish order by name";
-        private readonly string QuerySearchProduct=
+        private readonly string QuerySearchProduct =
                                 "select name as Продукт from ProductsList where name like @name order by name";
-        private  DataTable DataTableProducts = new DataTable();
+        private DataTable DataTableProducts = new DataTable();
         private readonly DataTable DataTableAddProducts = new DataTable();
         private SqlDataAdapter DataAdapterProducts;
         public AddRecipe()
@@ -56,7 +56,7 @@ namespace Canteen
                 var result = selectQuantityForm.ShowDialog();
                 if (result == DialogResult.OK)
                 {
-                    if(GridViewProductList.SelectedRows.Count > 0)
+                    if (GridViewProductList.SelectedRows.Count > 0)
                     {
                         var Value = selectQuantityForm.ReturnValue;
                         var Name = GridViewProductList.Rows[GridViewProductList.SelectedRows[0].Index].Cells[0].Value;
@@ -97,7 +97,7 @@ namespace Canteen
                     Id = FindDish(dishName);
                     AddRecipeMethod(Id);
                 }
-                catch(Exception exc)
+                catch (Exception exc)
                 {
                     MessageBox.Show(exc.Message);
                 }
@@ -157,7 +157,7 @@ namespace Canteen
 
         private void metroTextBox2_Click(object sender, EventArgs e)
         {
-            if(metroTextBox2.Text == "Введите технологию приготовления сюда") metroTextBox2.Text = "";
+            if (metroTextBox2.Text == "Введите технологию приготовления сюда") metroTextBox2.Text = "";
         }
 
         private void metroButton4_Click(object sender, EventArgs e)

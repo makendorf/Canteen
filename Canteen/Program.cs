@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Canteen
@@ -17,7 +15,7 @@ namespace Canteen
         {
             SQL sql = new SQL();
             string query = "select name from TypeOperation";
-            using(System.Data.Common.DbDataReader reader = sql.ExecuteQuery(query))
+            using (System.Data.Common.DbDataReader reader = sql.ExecuteQuery(query))
             {
                 try
                 {
@@ -32,7 +30,7 @@ namespace Canteen
                     reader.Read();
                     TypeOperationsList.Add(new TypeOperation { Type = Type.Inventarization, TypeStr = reader.GetString(0).Trim() });
                 }
-                catch(Exception exc)
+                catch (Exception exc)
                 {
                     MessageBox.Show(exc.Message);
                 }
@@ -52,7 +50,7 @@ namespace Canteen
                 InsertTypeOperation();
                 Application.Run(new Main());
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 MessageBox.Show(e.Message + Environment.NewLine + e.Source);
             }

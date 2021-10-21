@@ -1,14 +1,9 @@
 ﻿using MetroFramework.Forms;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Data.Common;
 using System.Data.SqlClient;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Canteen
@@ -66,11 +61,11 @@ namespace Canteen
             {
                 insert = SqlConnection.ExecuteNonQuery(QueryInsertProductList);
             }
-            catch(Exception exc)
+            catch (Exception exc)
             {
                 MessageBox.Show(exc.Message);
             }
-            if(insert > 0)
+            if (insert > 0)
             {
                 MessageBox.Show("Успешно");
             }

@@ -65,7 +65,7 @@ namespace Canteen
         private void AddProduction_Load(object sender, System.EventArgs e)
         {
             metroDateTime1.Value = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 0, 0, 0);
-            
+
             dataGridView1.DataSource = new BindingSource(DataTableAddDish, null);
             GridViewDishList.DataSource = new BindingSource(DataTableDish, null);
             DataTableAddDish.Columns.Add("Блюдо");
@@ -76,7 +76,7 @@ namespace Canteen
 
         private void UpdateCBTypeOperation()
         {
-            using(var reader = SqlConnection.ExecuteQuery(QueryTypeOperation))
+            using (var reader = SqlConnection.ExecuteQuery(QueryTypeOperation))
             {
                 if (reader.HasRows)
                 {
@@ -164,11 +164,11 @@ namespace Canteen
         }
         private int SelectTypeProductionInTypeSale()
         {
-            if(TypeOperation == 3)
+            if (TypeOperation == 3)
             {
                 return 1;
             }
-            else if(TypeOperation == 4)
+            else if (TypeOperation == 4)
             {
                 return 2;
             }
@@ -208,7 +208,7 @@ namespace Canteen
                                 var id = 0;
                                 var remains = 0;
                                 summRemains = 0;
-                                
+
                                 SqlConnection.SetSqlParameters(new List<SqlParameter>
                                 {
                                     new SqlParameter("@type", SelectTypeProductionInTypeSale()),
@@ -223,11 +223,11 @@ namespace Canteen
                                 }
                                 using (var readerRemains = SqlConnection.ExecuteQuery(QueryFindRemains))
                                 {
-                                    if(readerRemains.HasRows)
+                                    if (readerRemains.HasRows)
                                     {
-                                        while(readerRemains.Read())
+                                        while (readerRemains.Read())
                                         {
-                                            if(summRemains != 0)
+                                            if (summRemains != 0)
                                             {
                                                 if (remainsFact > summRemains)
                                                 {
@@ -244,7 +244,7 @@ namespace Canteen
                                                 var SqlChangeRemains = new SQL();
                                                 if (remainsFact > 0)
                                                 {
-                                                    
+
                                                     SqlChangeRemains.SetSqlParameters(new List<SqlParameter>
                                                     {
                                                         new SqlParameter("@id", id),
@@ -306,7 +306,7 @@ namespace Canteen
                                 }
                                 break;
                             }
-                            
+
                     }
                     var SqlConnProduct = new SQL();
                     SqlConnProduct.SetSqlParameters(new List<SqlParameter>
@@ -349,7 +349,7 @@ namespace Canteen
                                             }
                                             break;
                                         }
-                                
+
                                 }
                                 SqlConnMove.SetSqlParameters(new List<SqlParameter>
                                 {
@@ -365,7 +365,7 @@ namespace Canteen
                     }
                 }
             }
-            catch(Exception exc)
+            catch (Exception exc)
             {
                 MessageBox.Show(exc.Message);
             }
@@ -375,11 +375,11 @@ namespace Canteen
             }
         }
 
-       
+
 
         private void metroDateTime1_ValueChanged(object sender, EventArgs e)
         {
-            if(TypeOperation == 2)
+            if (TypeOperation == 2)
             {
                 UpdateDishGrid();
             }
@@ -409,7 +409,7 @@ namespace Canteen
                         break;
                     }
             }
-            
+
         }
 
         private void metroComboBox1_SelectedIndexChanged(object sender, EventArgs e)

@@ -37,7 +37,7 @@ namespace Canteen
         }
         public int ExecuteNonQuery(string cmd = "")
         {
-            if(cmd != "")
+            if (cmd != "")
             {
                 SqlCommand.CommandText = cmd;
             }
@@ -47,19 +47,21 @@ namespace Canteen
         {
             SqlCommand.CommandText = cmd;
         }
-        public SqlDataAdapter QueryForDataAdapter(string cmd = "")
+        public SqlDataAdapter QueryForDataAdapter(string selectCMD = "", string deleteCMD = "", string updateCMD = "")
         {
-            SqlCommand = new SqlCommand(cmd, SqlConnection);
-            SqlDataAdapter dataAdapter = new SqlDataAdapter(SqlCommand);
+            SqlDataAdapter dataAdapter = new SqlDataAdapter();
+            dataAdapter.SelectCommand = new SqlCommand(selectCMD, SqlConnection);
+            dataAdapter.DeleteCommand = new SqlCommand(deleteCMD, SqlConnection);
+            dataAdapter.UpdateCommand = new SqlCommand(updateCMD, SqlConnection);
             return dataAdapter;
         }
         public void SetSqlParameters(List<SqlParameter> sqlParameterCollection)
         {
             SqlCommand.Parameters.Clear();
             SqlCommand.Parameters.AddRange(sqlParameterCollection.ToArray());
-            for(int i = 0; i < SqlCommand.Parameters.Count; i++)
+            for (int i = 0; i < SqlCommand.Parameters.Count; i++)
             {
-                if(SqlCommand.Parameters[i].SqlDbType == System.Data.SqlDbType.DateTime)
+                if (SqlCommand.Parameters[i].SqlDbType == System.Data.SqlDbType.DateTime)
                 {
                     SqlCommand.Parameters[i].SqlDbType = System.Data.SqlDbType.Date;
                 }
@@ -71,6 +73,6 @@ namespace Canteen
         }
 
 
-        
+
     }
 }

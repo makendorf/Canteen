@@ -1,11 +1,6 @@
 ﻿using MetroFramework.Forms;
-using System.Collections.Generic;
 using System.Data;
-using System.Data.Common;
 using System.Data.SqlClient;
-using System.IO;
-using System.Linq;
-using System.Threading;
 using System.Windows.Forms;
 
 namespace Canteen
@@ -44,9 +39,9 @@ namespace Canteen
             //        MessageBox.Show(reader.GetString(0));
             //    }
             //}
-            
+
         }
-        
+
         private void Main_Load(object sender, System.EventArgs e)
         {
             movementProductionProductDataGrid.DataSource = new BindingSource(DataTableMovementProductionProduct, null);
@@ -164,7 +159,7 @@ namespace Canteen
 
         private void tabControl1_SelectedIndexChanged(object sender, System.EventArgs e)
         {
-            if(tabControl1.SelectedIndex == 0)
+            if (tabControl1.SelectedIndex == 0)
             {
                 UpdateDataTableMovement();
             }
