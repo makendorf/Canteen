@@ -13,8 +13,10 @@ namespace Canteen
         private readonly SQL SqlConnection = new SQL();
         private readonly string QueryUpdateProductList = "select name as Продукт from ProductsList order by name";
         private readonly string QueryInsertProductList = "insert into ProductsList (name, category) " +
-            "values (@name, (select top 1 Id from CategoryList where name like @category))";
-        private DataTable DataTableProductList = new DataTable();
+            "values (@name, (select top 1 Id from CategoryList where name like @category)); " +
+            "insert into ProductsQuantity (product_id) " +
+            "values ((select top 1 Id from ProductsList where name like @name))";
+        private readonly DataTable DataTableProductList = new DataTable();
         private SqlDataAdapter DataAdapterProductList;
         public AddProduct()
         {
@@ -59,11 +61,14 @@ namespace Canteen
             int insert = 0;
             try
             {
+                //SqlConnection.BeginTransaction();
                 insert = SqlConnection.ExecuteNonQuery(QueryInsertProductList);
+                //SqlConnection.Commit();
             }
             catch (Exception exc)
             {
                 MessageBox.Show(exc.Message);
+                //SqlConnection.RollBack();
             }
             if (insert > 0)
             {

@@ -9,11 +9,11 @@ namespace Canteen
     {
         private readonly SQL SqlConnection = new SQL();
         private readonly string QueryUpdateMovement =
-                                "select typeOper.name as Операция, date as Дата, Dish.name as Блюдо, Round(sum(Movement.quantity), 3) as КГ from Movement " +
+                                "select typeOper.name as Операция, date as Дата, coalesce(Dish.name, prod.name) as Блюдо, Round(sum(Movement.quantity), 3) as КГ from Movement " +
                                 "left join ProductsList as prod on prod.Id = Movement.product " +
                                 "left join DishList as Dish on Dish.Id = Movement.dish " +
                                 "left join TypeOperation as typeOper on typeOper.Id = Movement.type " +
-                                "group by typeOper.name, Dish.name, date " +
+                                "group by typeOper.name, coalesce(Dish.name, prod.name), date " +
                                 "order by date desc";
         private readonly string QueryUpdateMovementProductionProduct =
                                 "select prod.name as Продукт, Round(sum(Movement.quantity), 3) as КГ from Movement " +
@@ -24,8 +24,8 @@ namespace Canteen
                                 "order by prod.name";
 
 
-        private DataTable DataTableMovement = new DataTable();
-        private DataTable DataTableMovementProductionProduct = new DataTable();
+        private readonly DataTable DataTableMovement = new DataTable();
+        private readonly DataTable DataTableMovementProductionProduct = new DataTable();
 
         private SqlDataAdapter DataAdapterMovement;
         private SqlDataAdapter DataAdapterMovementProductionProduct;
@@ -84,6 +84,8 @@ namespace Canteen
         private void UpdateDataTableMovement()
         {
             DataTableMovement.Clear();
+            //DataAdapterMovement.SelectCommand.Parameters.AddWithValue("@headName", "prod.name, ");
+            //DataAdapterMovement.SelectCommand.Parameters.AddWithValue("@name", ", prod.name ");
             DataAdapterMovement = SqlConnection.QueryForDataAdapter(QueryUpdateMovement);
             DataAdapterMovement.Fill(DataTableMovement);
             movementDataGrid.Columns[0].Width = movementDataGrid.Columns[2].Width = 200;
@@ -133,26 +135,26 @@ namespace Canteen
 
         private void ButtonAddProduct_Click(object sender, System.EventArgs e)
         {
-            var AddProduct = new AddProduct();
+            AddProduct AddProduct = new AddProduct();
             AddProduct.ShowDialog();
         }
 
         private void metroButton1_Click(object sender, System.EventArgs e)
         {
-            var AddRecipe = new ProductAndRecipe();
+            ProductAndRecipe AddRecipe = new ProductAndRecipe();
             AddRecipe.ShowDialog();
         }
 
         private void metroButton2_Click(object sender, System.EventArgs e)
         {
-            var AddRecipe = new ProductAndRecipe();
+            ProductAndRecipe AddRecipe = new ProductAndRecipe();
             AddRecipe.ShowDialog();
             UpdateDataTableMovement();
         }
 
         private void metroButton3_Click(object sender, System.EventArgs e)
         {
-            var addProductionSaleForm = new ProductionSale();
+            ProductionSale addProductionSaleForm = new ProductionSale();
             addProductionSaleForm.ShowDialog();
             UpdateDataTableMovement();
         }

@@ -44,6 +44,9 @@ namespace Canteen
             this.metroTextBox1 = new MetroFramework.Controls.MetroTextBox();
             this.splitContainer4 = new System.Windows.Forms.SplitContainer();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.metroButton5 = new MetroFramework.Controls.MetroButton();
+            this.metroButton4 = new MetroFramework.Controls.MetroButton();
+            this.metroCheckBox1 = new MetroFramework.Controls.MetroCheckBox();
             this.splitContainer5 = new System.Windows.Forms.SplitContainer();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.metroButton3 = new MetroFramework.Controls.MetroButton();
@@ -71,6 +74,7 @@ namespace Canteen
             this.splitContainer4.Panel1.SuspendLayout();
             this.splitContainer4.Panel2.SuspendLayout();
             this.splitContainer4.SuspendLayout();
+            this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer5)).BeginInit();
             this.splitContainer5.Panel1.SuspendLayout();
             this.splitContainer5.SuspendLayout();
@@ -119,6 +123,7 @@ namespace Canteen
             this.DataGridRecipe.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.DataGridRecipe.Dock = System.Windows.Forms.DockStyle.Fill;
             this.DataGridRecipe.Location = new System.Drawing.Point(0, 0);
+            this.DataGridRecipe.MultiSelect = false;
             this.DataGridRecipe.Name = "DataGridRecipe";
             this.DataGridRecipe.Size = new System.Drawing.Size(244, 564);
             this.DataGridRecipe.TabIndex = 0;
@@ -152,9 +157,11 @@ namespace Canteen
             this.DataGridProduct.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.DataGridProduct.Dock = System.Windows.Forms.DockStyle.Fill;
             this.DataGridProduct.Location = new System.Drawing.Point(0, 0);
+            this.DataGridProduct.MultiSelect = false;
             this.DataGridProduct.Name = "DataGridProduct";
             this.DataGridProduct.Size = new System.Drawing.Size(218, 539);
             this.DataGridProduct.TabIndex = 2;
+            this.DataGridProduct.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DataGridProduct_CellClick);
             this.DataGridProduct.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.ProductDataGrid_CellValueChanged);
             // 
             // toolStrip2
@@ -193,7 +200,6 @@ namespace Canteen
             // 
             // toolStripTextBox1
             // 
-            this.toolStripTextBox1.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.toolStripTextBox1.Name = "toolStripTextBox1";
             this.toolStripTextBox1.Size = new System.Drawing.Size(250, 25);
             this.toolStripTextBox1.TextChanged += new System.EventHandler(this.toolStripTextBox1_TextChanged);
@@ -269,15 +275,56 @@ namespace Canteen
             // 
             // tableLayoutPanel1
             // 
+            this.tableLayoutPanel1.CellBorderStyle = System.Windows.Forms.TableLayoutPanelCellBorderStyle.Single;
             this.tableLayoutPanel1.ColumnCount = 1;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel1.Controls.Add(this.metroButton5, 0, 1);
+            this.tableLayoutPanel1.Controls.Add(this.metroButton4, 0, 0);
+            this.tableLayoutPanel1.Controls.Add(this.metroCheckBox1, 0, 2);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 1;
+            this.tableLayoutPanel1.RowCount = 3;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 72F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 67F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(135, 216);
             this.tableLayoutPanel1.TabIndex = 0;
+            // 
+            // metroButton5
+            // 
+            this.metroButton5.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.metroButton5.Enabled = false;
+            this.metroButton5.Location = new System.Drawing.Point(16, 86);
+            this.metroButton5.Name = "metroButton5";
+            this.metroButton5.Size = new System.Drawing.Size(102, 50);
+            this.metroButton5.TabIndex = 1;
+            this.metroButton5.Text = "Удалить \r\nпродукт \r\nиз блюда";
+            this.metroButton5.UseSelectable = true;
+            this.metroButton5.Click += new System.EventHandler(this.metroButton5_Click);
+            // 
+            // metroButton4
+            // 
+            this.metroButton4.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.metroButton4.Enabled = false;
+            this.metroButton4.Location = new System.Drawing.Point(16, 26);
+            this.metroButton4.Name = "metroButton4";
+            this.metroButton4.Size = new System.Drawing.Size(102, 23);
+            this.metroButton4.TabIndex = 0;
+            this.metroButton4.Text = "Удалить блюдо";
+            this.metroButton4.UseSelectable = true;
+            this.metroButton4.Click += new System.EventHandler(this.metroButton4_Click);
+            // 
+            // metroCheckBox1
+            // 
+            this.metroCheckBox1.AutoSize = true;
+            this.metroCheckBox1.Location = new System.Drawing.Point(4, 151);
+            this.metroCheckBox1.Name = "metroCheckBox1";
+            this.metroCheckBox1.Size = new System.Drawing.Size(112, 15);
+            this.metroCheckBox1.TabIndex = 1;
+            this.metroCheckBox1.Text = "Редактирование";
+            this.metroCheckBox1.UseSelectable = true;
+            this.metroCheckBox1.CheckedChanged += new System.EventHandler(this.metroCheckBox1_CheckedChanged);
             // 
             // splitContainer5
             // 
@@ -380,6 +427,8 @@ namespace Canteen
             this.splitContainer4.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer4)).EndInit();
             this.splitContainer4.ResumeLayout(false);
+            this.tableLayoutPanel1.ResumeLayout(false);
+            this.tableLayoutPanel1.PerformLayout();
             this.splitContainer5.Panel1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer5)).EndInit();
             this.splitContainer5.ResumeLayout(false);
@@ -410,5 +459,8 @@ namespace Canteen
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
         private System.Windows.Forms.SplitContainer splitContainer3;
         private System.Windows.Forms.Panel panel2;
+        private MetroFramework.Controls.MetroButton metroButton4;
+        private MetroFramework.Controls.MetroButton metroButton5;
+        private MetroFramework.Controls.MetroCheckBox metroCheckBox1;
     }
 }

@@ -5,7 +5,7 @@ using System.IO;
 using Excel = Microsoft.Office.Interop.Excel;
 namespace Canteen
 {
-    class ReportXLMS
+    internal class ReportXLMS
     {
         private readonly int TypeDocument;
         private readonly DateTime Date;
@@ -13,9 +13,10 @@ namespace Canteen
         private Excel.Worksheet List;
         private Excel.Range Range;
         private readonly string QueryUpdateDishSale =
-                                "select _dish.Name as Блюда, ProductionSale.dish, ProductionSale.quantity from ProductionSale " +
+                                "select _dish.Name as Блюда, ProductionSale.dish, sum(ProductionSale.quantity) as TotalQuantity from ProductionSale  " +
                                 "left join DishList as _dish on _dish.Id = ProductionSale.dish " +
-                                "where date = @date and type = @type";
+                                "where date = @date and type = @type " +
+                                "group by _dish.Name, ProductionSale.dish";
         private readonly string QueryUpdateMovementDishProductAll =
                                 "select prod.name as Продукт, Movement.product from Movement " +
                                 "left join ProductsList as prod on prod.Id = Movement.product " +
@@ -42,7 +43,7 @@ namespace Canteen
             {
                 Visible = false
             };
-            Kniga.Workbooks.Open($@"{Directory.GetCurrentDirectory()}\Resources\Reports\report");
+            Kniga.Workbooks.Open($@"{Directory.GetCurrentDirectory()}\Resources\Reports\report.xlsx");
             List = (Excel.Worksheet)Kniga.Worksheets.get_Item(1);
             List.PageSetup.Orientation = Excel.XlPageOrientation.xlLandscape;
         }
@@ -86,13 +87,13 @@ namespace Canteen
                 new SqlParameter("@date", Date.ToShortDateString()),
                 new SqlParameter("@type", TypeDocument)
             });
-            using (var reader = SqlConnection.ExecuteQuery(QueryUpdateDishSale))
+            using (SqlDataReader reader = SqlConnection.ExecuteQuery(QueryUpdateDishSale))
             {
                 if (reader.HasRows)
                 {
                     while (reader.Read())
                     {
-                        DishList.Add(new List<string> { reader.GetString(0), reader.GetInt32(1).ToString(), reader.GetInt32(2).ToString() });
+                        DishList.Add(new List<string> { reader.GetString(0), reader.GetInt32(1).ToString(), reader.GetDouble(2).ToString() });
                     }
                     Range = GetRange(List.Cells[4, 3], List.Cells[4, DishList.Count + 2]);
                     Range.Cells.WrapText = true;
@@ -101,7 +102,7 @@ namespace Canteen
                 }
             }
 
-            using (var reader = SqlConnection.ExecuteQuery(QueryUpdateMovementDishProductAll))
+            using (SqlDataReader reader = SqlConnection.ExecuteQuery(QueryUpdateMovementDishProductAll))
             {
                 if (reader.HasRows)
                 {
@@ -127,14 +128,17 @@ namespace Canteen
                         new SqlParameter("@date", Date),
                         new SqlParameter("@type", TypeDocument)
                     });
-                    using (var reader = SqlConnection.ExecuteQuery(QueryFindValueProductInDish))
+                    using (SqlDataReader reader = SqlConnection.ExecuteQuery(QueryFindValueProductInDish))
                     {
+                        Kniga.Visible = true;
                         if (reader.HasRows)
                         {
+                            double summPerDay = 0;
                             while (reader.Read())
                             {
-                                List.Cells[j, i] = reader.GetDouble(0);
+                                summPerDay += reader.GetDouble(0);
                             }
+                            List.Cells[j, i] = summPerDay;
                         }
                     }
                 }
@@ -145,7 +149,7 @@ namespace Canteen
                 new SqlParameter("@date", Date),
                 new SqlParameter("@type", TypeDocument)
             });
-            using (var reader = SqlConnection.ExecuteQuery(QueryFullQuantityProduct))
+            using (SqlDataReader reader = SqlConnection.ExecuteQuery(QueryFullQuantityProduct))
             {
                 if (reader.HasRows)
                 {
@@ -241,16 +245,22 @@ namespace Canteen
         }
         public void SaveDocument()
         {
+            
             string TypeName = "";
-            using (var reader = SqlConnection.ExecuteQuery($@"select name from TypeOperation where Id = {TypeDocument}"))
+            using (SqlDataReader reader = SqlConnection.ExecuteQuery($@"select name from TypeOperation where Id = {TypeDocument}"))
             {
                 reader.Read();
                 TypeName = reader.GetString(0);
             }
+            string path = $@"{Directory.GetCurrentDirectory()}\Resources\Reports\{Date.ToShortDateString()} {TypeName}.xlsx";
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
             Kniga.Application.ActiveWorkbook.SaveAs(
-                $@"{Directory.GetCurrentDirectory()}\Resources\Reports\{Date.ToShortDateString()} {TypeName}.xlsx",
+                path,
                 System.Type.Missing, System.Type.Missing, System.Type.Missing, System.Type.Missing,
-                System.Type.Missing, Excel.XlSaveAsAccessMode.xlNoChange, System.Type.Missing, System.Type.Missing,
+                System.Type.Missing, Excel.XlSaveAsAccessMode.xlExclusive, System.Type.Missing, System.Type.Missing,
                 System.Type.Missing, System.Type.Missing, System.Type.Missing);
             ClearCOM();
         }

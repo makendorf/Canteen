@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data.SqlClient;
 
 namespace Canteen
@@ -7,6 +8,11 @@ namespace Canteen
     {
         private SqlConnection SqlConnection { get; set; }
         private SqlCommand SqlCommand { get; set; }
+
+        public SqlTransaction GetSqlTransaction()
+        {
+            return SqlCommand.Transaction;
+        }
         public SQL()
         {
             SqlConnection = new SqlConnection(GetConnectionString());
@@ -18,10 +24,31 @@ namespace Canteen
         }
         private string GetConnectionString()
         {
-            var connString = Properties.Settings.Default.canteenConnectionString;
+            string connString = Properties.Settings.Default.canteenConnectionString;
             //var connString = Properties.Settings.Default.canteenTestConnectionString;
             return connString;
         }
+        public void BeginTransaction(SqlTransaction transaction = null)
+        {
+            if(transaction == null)
+            {
+                SqlCommand.Transaction = SqlConnection.BeginTransaction();
+            }
+            else
+            {
+                SqlCommand.Transaction = transaction;
+            }
+            
+        }
+        public void Commit()
+        {
+            SqlCommand.Transaction.Commit();
+        }
+        public void RollBack()
+        {
+            SqlCommand.Transaction.Rollback();
+        }
+
         public SqlDataReader ExecuteQuery(string cmd = "")
         {
             if (cmd != "")
@@ -49,10 +76,12 @@ namespace Canteen
         }
         public SqlDataAdapter QueryForDataAdapter(string selectCMD = "", string deleteCMD = "", string updateCMD = "")
         {
-            SqlDataAdapter dataAdapter = new SqlDataAdapter();
-            dataAdapter.SelectCommand = new SqlCommand(selectCMD, SqlConnection);
-            dataAdapter.DeleteCommand = new SqlCommand(deleteCMD, SqlConnection);
-            dataAdapter.UpdateCommand = new SqlCommand(updateCMD, SqlConnection);
+            SqlDataAdapter dataAdapter = new SqlDataAdapter
+            {
+                SelectCommand = new SqlCommand(selectCMD, SqlConnection),
+                DeleteCommand = new SqlCommand(deleteCMD, SqlConnection),
+                UpdateCommand = new SqlCommand(updateCMD, SqlConnection)
+            };
             return dataAdapter;
         }
         public void SetSqlParameters(List<SqlParameter> sqlParameterCollection)
@@ -72,7 +101,33 @@ namespace Canteen
             SqlConnection.Close();
         }
 
-
+        //public void Dispose()
+        //{
+        //    Dispose(disposing: true);
+        //    GC.SuppressFinalize(this);
+        //}
+        //protected virtual void Dispose(bool disposing)
+        //{
+        //    if (!this.disposed)
+        //    {
+        //        if (disposing)
+        //        {
+        //            sqlTransaction.Dispose();
+        //            SqlCommand.Dispose();
+        //            SqlConnection.Dispose();
+        //        }
+        //        CloseHandle(handle);
+        //        handle = IntPtr.Zero;
+        //        disposed = true;
+        //    }
+        //}
+        //[System.Runtime.InteropServices.DllImport("Kernel32")]
+        //private extern static Boolean CloseHandle(IntPtr handle);
+        //~SQL()
+        //{
+        //    Dispose(disposing: false);
+        //}
+        
 
     }
 }

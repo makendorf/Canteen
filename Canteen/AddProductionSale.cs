@@ -48,35 +48,70 @@ namespace Canteen
             "left join ProductsList as prod on prod.Id = RecipeList.product " +
             "where dish = (select TOP 1 Id from DishList where name like @dishName) order by RecipeList.product";
         private readonly string QueryFindSummRemains = "select sum(remains) from ProductionSale " +
-                               $@"where (date = @date or date = @dateLast) and " +
-                               $@"dish = (select top 1 Id from DishList where name like @dishName) and " +
-                               $@"type = @type";
-        private readonly string QueryFindRemains = "select Id, remains, date from ProductionSale " +
-                                $@"where (date = @date or date = @dateLast) and " +
-                                $@"dish = (select top 1 Id from DishList where name like @dishName) and " +
-                                $@"type = @type order by date asc";
-        private readonly string QueryUpdateRemainsForProduction = "update ProductionSale set remains = @remains where Id = @id";
+            $@"where (date = @date or date = @dateLast) and " +
+            $@"dish = (select top 1 Id from DishList where name like @dishName) and " +
+            $@"type = @type";
+        private readonly string QueryFindRemains = 
+            "select Id, remains, date from ProductionSale " +
+            $@"where (date = @date or date = @dateLast) and " +
+            $@"dish = (select top 1 Id from DishList where name like @dishName) and " +
+            $@"type = @type order by date asc";
+        private readonly string QueryUpdateRemainsForProduction = 
+            "update ProductionSale set remains = @remains where Id = @id";
+        private readonly string QueryUpdateProductQuantity =
+            "update ProductsQuantity set quantity = @quantity " +
+            "where product_id = (select top 1 Id from ProductsList where name like @name)";
+        private readonly string QueryInsertMovementСomingProduct =
+            "insert into Movement (type, date, product, quantity) values " +
+            "(@typeOperation, " +
+            "@date, " +
+            "(select top 1 Id from ProductsList where name like @name), " +
+            "@quantity)";
+        private readonly string QueryUpdateProductComming =
+            "select name as Продукт from ProductsList";
+        private readonly string QueryFindProductComming =
+            "select name as Продукт from ProductsList where name like @name";
 
         private DataTable DataTableDish = new DataTable();
         private DataTable DataTableAddDish = new DataTable();
 
 
         private SqlDataAdapter DataAdapterDish;
-        private void AddProduction_Load(object sender, System.EventArgs e)
+        private void AddProduction_Load(object sender, EventArgs e)
         {
             metroDateTime1.Value = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 0, 0, 0);
-
+            UpdateCBTypeOperation();
             dataGridView1.DataSource = new BindingSource(DataTableAddDish, null);
             GridViewDishList.DataSource = new BindingSource(DataTableDish, null);
-            DataTableAddDish.Columns.Add("Блюдо");
-            DataTableAddDish.Columns.Add("Количество порций");
-            UpdateCBTypeOperation();
+            UpdateHeaderAddDishTable();
+
             UpdateDishGrid();
+        }
+
+        private void UpdateHeaderAddDishTable()
+        {
+            DataTableAddDish = new DataTable();
+            dataGridView1.DataSource = new BindingSource(DataTableAddDish, null);
+            switch (TypeOperation)
+            {
+                case 5:
+                    {
+                        DataTableAddDish.Columns.Add("Продукт");
+                        DataTableAddDish.Columns.Add("Количество");
+                        break;
+                    }
+                default:
+                    {
+                        DataTableAddDish.Columns.Add("Блюдо");
+                        DataTableAddDish.Columns.Add("Количество порций");
+                        break;
+                    }
+            }
         }
 
         private void UpdateCBTypeOperation()
         {
-            using (var reader = SqlConnection.ExecuteQuery(QueryTypeOperation))
+            using (SqlDataReader reader = SqlConnection.ExecuteQuery(QueryTypeOperation))
             {
                 if (reader.HasRows)
                 {
@@ -90,75 +125,68 @@ namespace Canteen
         }
         private void InsertProductionInDataTable()
         {
-            DataAdapterDish = SqlConnection.QueryForDataAdapter(QueryUpdateDishProduction);
-        }
-        private void UpdateDishGrid()
-        {
-
-            DataTableDish.Clear();
             switch (TypeOperation)
             {
-                case 0:
-                    {
-                        InsertProductionInDataTable();
-                        break;
-                    }
-                case 1:
-                    {
-                        InsertProductionInDataTable();
-                        break;
-                    }
+                case 0: goto case 2;
+                case 1: goto case 2;
                 case 2:
                     {
-                        InsertProductionInDataTable();
+                        DataAdapterDish = SqlConnection.QueryForDataAdapter(QueryUpdateDishProduction);
                         break;
                     }
-                case 3:
+                case 3: goto case 4;
+                case 4:
                     {
                         DataAdapterDish = SqlConnection.QueryForDataAdapter(QueryUpdateDishSale);
                         DataAdapterDish.SelectCommand.Parameters.AddWithValue("@date", metroDateTime1.Value);
                         DataAdapterDish.SelectCommand.Parameters.AddWithValue("@type", 1);
                         break;
                     }
-                case 4:
+                case 5:
                     {
-                        DataAdapterDish = SqlConnection.QueryForDataAdapter(QueryUpdateDishSale);
-                        DataAdapterDish.SelectCommand.Parameters.AddWithValue("@date", metroDateTime1.Value);
-                        DataAdapterDish.SelectCommand.Parameters.AddWithValue("@type", 2);
+                        DataAdapterDish = SqlConnection.QueryForDataAdapter(QueryUpdateProductComming);
                         break;
                     }
+
             }
+           
+        }
+        private void UpdateDishGrid()
+        {
+            DataTableDish = new DataTable();
+            GridViewDishList.DataSource = new BindingSource(DataTableDish, null);
+            DataTableDish.Clear();
+            InsertProductionInDataTable();
             DataAdapterDish.Fill(DataTableDish);
             GridViewDishList.Columns[0].Width = 200;
         }
 
         private void GridViewDishList_DoubleClick(object sender, EventArgs e)
         {
-            using (var selectQuantityForm = new SelectQuantity("Колличество порций"))
+            using (SelectQuantity selectQuantityForm = new SelectQuantity("Колличество порций"))
             {
                 selectQuantityForm.Text = GridViewDishList.SelectedCells[0].Value.ToString();
                 if (selectQuantityForm.ShowDialog() == DialogResult.OK)
                 {
-                    if (GridViewDishList.SelectedRows.Count > 0)
+                    DataRow _row = DataTableAddDish.NewRow();
+                    string Value = selectQuantityForm.ReturnValue;
+                    object Name = GridViewDishList.SelectedCells[0].Value;
+                    switch (TypeOperation)
                     {
-                        var Value = selectQuantityForm.ReturnValue;
-                        var Name = GridViewDishList.Rows[GridViewDishList.SelectedRows[0].Index].Cells[0].Value;
-
-                        var _row = DataTableAddDish.NewRow();
-                        _row["Блюдо"] = Name;
-                        _row["Количество порций"] = Value;
-                        DataTableAddDish.Rows.Add(_row);
+                        case 5:
+                            {
+                                _row["Продукт"] = Name;
+                                _row["Количество"] = Value;
+                                break;
+                            }
+                        default:
+                            {
+                                _row["Блюдо"] = Name;
+                                _row["Количество порций"] = Value;
+                                break;
+                            }
                     }
-                    else
-                    {
-                        var Value = selectQuantityForm.ReturnValue;
-                        var Name = GridViewDishList.SelectedCells[0].Value;
-
-                        var _row = DataTableAddDish.NewRow();
-                        _row["Блюдо"] = Name;
-                        _row["Количество порций"] = Value;
-                        DataTableAddDish.Rows.Add(_row);
-                    }
+                    DataTableAddDish.Rows.Add(_row);
                 }
             }
         }
@@ -178,14 +206,15 @@ namespace Canteen
         {
             try
             {
-                var date = metroDateTime1.Value;
-                var summRemains = 0;
+                DateTime date = metroDateTime1.Value;
+                double summRemains = 0;
+                SqlConnection.BeginTransaction();
                 for (int i = 0; i < DataTableAddDish.Rows.Count; i++)
                 {
-                    var dishName = DataTableAddDish.Rows[i].ItemArray[0];
-                    var quantity = Convert.ToInt32(DataTableAddDish.Rows[i].ItemArray[1]);
-                    var remainsFact = quantity;
-                    var remainsLastDay = 0;
+                    object name = DataTableAddDish.Rows[i].ItemArray[0];
+                    double quantity = Convert.ToDouble(DataTableAddDish.Rows[i].ItemArray[1].ToString().Replace(".", ","));
+                    double remainsFact = quantity;
+                    double remainsLastDay = 0;
                     switch (TypeOperation)
                     {
                         case 1: goto case 2;
@@ -195,33 +224,34 @@ namespace Canteen
                                 {
                                     new SqlParameter("@typeOperation", TypeOperation),
                                     new SqlParameter("@date",  date),
-                                    new SqlParameter("@dishName",  dishName),
+                                    new SqlParameter("@dishName",  name),
                                     new SqlParameter("@quantity",  quantity),
                                     new SqlParameter("@remains", quantity)
                                 });
                                 SqlConnection.ExecuteNonQuery(QueryInsertProductionSale);
+                                InsertMovement(date, name, quantity, remainsLastDay);
                                 break;
                             }
                         case 3: goto case 4;
                         case 4:
                             {
-                                var id = 0;
-                                var remains = 0;
+                                int id = 0;
+                                double remains = 0;
                                 summRemains = 0;
 
                                 SqlConnection.SetSqlParameters(new List<SqlParameter>
                                 {
                                     new SqlParameter("@type", SelectTypeProductionInTypeSale()),
                                     new SqlParameter("@date",  date),
-                                    new SqlParameter("@dishName",  dishName),
+                                    new SqlParameter("@dishName",  name),
                                     new SqlParameter("@dateLast",  date.AddDays(-1))
                                 });
-                                using (var readerRemains = SqlConnection.ExecuteQuery(QueryFindSummRemains))
+                                using (SqlDataReader readerRemains = SqlConnection.ExecuteQuery(QueryFindSummRemains))
                                 {
                                     readerRemains.Read();
-                                    summRemains = readerRemains.GetInt32(0);
+                                    summRemains = readerRemains.GetDouble(0);
                                 }
-                                using (var readerRemains = SqlConnection.ExecuteQuery(QueryFindRemains))
+                                using (SqlDataReader readerRemains = SqlConnection.ExecuteQuery(QueryFindRemains))
                                 {
                                     if (readerRemains.HasRows)
                                     {
@@ -234,14 +264,14 @@ namespace Canteen
                                                     remainsFact = summRemains;
                                                 }
                                                 id = readerRemains.GetInt32(0);
-                                                remains = readerRemains.GetInt32(1);
+                                                remains = readerRemains.GetDouble(1);
 
                                                 remainsFact -= remains;
                                                 if (readerRemains.GetDateTime(2).ToShortDateString() == date.AddDays(-1).ToShortDateString())
                                                 {
                                                     remainsLastDay += remains;
                                                 }
-                                                var SqlChangeRemains = new SQL();
+                                                SQL SqlChangeRemains = new SQL();
                                                 if (remainsFact > 0)
                                                 {
 
@@ -295,7 +325,7 @@ namespace Canteen
                                 {
                                     new SqlParameter("@typeOperation", TypeOperation),
                                     new SqlParameter("@date",  date),
-                                    new SqlParameter("@dishName",  dishName),
+                                    new SqlParameter("@dishName",  name),
                                     new SqlParameter("@quantity",  quantity),
                                     new SqlParameter("@remains", remainsFact)
                                 });
@@ -304,54 +334,87 @@ namespace Canteen
                                 {
                                     quantity = summRemains;
                                 }
+                                InsertMovement(date, name, quantity, remainsLastDay);
                                 break;
                             }
+                        case 5:
+                            {
+                                SqlConnection.SetSqlParameters(new List<SqlParameter>
+                                {
+                                    new SqlParameter("@name",  name),
+                                    new SqlParameter("@quantity",  quantity)
+                                });
+                                SqlConnection.ExecuteNonQuery(QueryUpdateProductQuantity);
 
+                                SqlConnection.SetSqlParameters(new List<SqlParameter>
+                                {
+                                    new SqlParameter("@typeOperation", TypeOperation),
+                                    new SqlParameter("@date",  date),
+                                    new SqlParameter("@name",  name),
+                                    new SqlParameter("@quantity",  quantity)
+                                });
+                                SqlConnection.ExecuteNonQuery(QueryInsertMovementСomingProduct);
+                                break;
+                            }
                     }
-                    var SqlConnProduct = new SQL();
-                    SqlConnProduct.SetSqlParameters(new List<SqlParameter>
+                    
+                }
+                SqlConnection.Commit();
+                MessageBox.Show("Успешно");
+
+            }
+            catch (Exception exc)
+            {
+                SqlConnection.RollBack();
+                MessageBox.Show(exc.Message);
+            }
+        }
+
+        private void InsertMovement(DateTime date, object dishName, double quantity, double remainsLastDay)
+        {
+            SQL SqlConnProduct = new SQL();
+            SqlConnProduct.SetSqlParameters(new List<SqlParameter>
                     {
                         new SqlParameter("@dishName", dishName)
                     });
-                    using (var reader = SqlConnProduct.ExecuteQuery(QueryFindProductFromDish))
+            using (SqlDataReader reader = SqlConnProduct.ExecuteQuery(QueryFindProductFromDish))
+            {
+                if (reader.HasRows)
+                {
+                    while (reader.Read())
                     {
-                        if (reader.HasRows)
+                        int productId = reader.GetInt32(0);
+                        int category = reader.GetInt32(2);
+                        dynamic quantityKg = 0;
+                        switch (category)
                         {
-                            while (reader.Read())
-                            {
-                                var SqlConnMove = new SQL();
-                                var productId = reader.GetInt32(0);
-                                var category = reader.GetInt32(2);
-                                dynamic quantityKg = 0;
-                                switch (category)
+                            case 10008:
                                 {
-                                    case 10008:
-                                        {
-                                            quantityKg = quantity;
-                                            break;
-                                        }
-                                    default:
-                                        {
-                                            switch (TypeOperation)
-                                            {
-                                                case 1: goto case 2;
-                                                case 2:
-                                                    {
-                                                        quantityKg = Math.Round(reader.GetDouble(1) * quantity, 3);
-                                                        break;
-                                                    }
-                                                case 3: goto case 4;
-                                                case 4:
-                                                    {
-                                                        quantityKg = Math.Round(reader.GetDouble(1) * (quantity - remainsLastDay), 3);
-                                                        break;
-                                                    }
-                                            }
-                                            break;
-                                        }
-
+                                    quantityKg = quantity;
+                                    break;
                                 }
-                                SqlConnMove.SetSqlParameters(new List<SqlParameter>
+                            default:
+                                {
+                                    switch (TypeOperation)
+                                    {
+                                        case 1: goto case 2;
+                                        case 2:
+                                            {
+                                                quantityKg = Math.Round(reader.GetDouble(1) * quantity, 3);
+                                                break;
+                                            }
+                                        case 3: goto case 4;
+                                        case 4:
+                                            {
+                                                quantityKg = Math.Round(reader.GetDouble(1) * (quantity - remainsLastDay), 3);
+                                                break;
+                                            }
+                                    }
+                                    break;
+                                }
+
+                        }
+                        SqlConnection.SetSqlParameters(new List<SqlParameter>
                                 {
                                     new SqlParameter("@typeOperation", TypeOperation),
                                     new SqlParameter("@date", date),
@@ -359,23 +422,11 @@ namespace Canteen
                                     new SqlParameter("@productId", productId),
                                     new SqlParameter("@quantity", quantityKg)
                                 });
-                                SqlConnMove.ExecuteNonQuery(QueryInsertMovement);
-                            }
-                        }
+                        SqlConnection.ExecuteNonQuery(QueryInsertMovement);
                     }
                 }
             }
-            catch (Exception exc)
-            {
-                MessageBox.Show(exc.Message);
-            }
-            finally
-            {
-                MessageBox.Show("Успешно");
-            }
         }
-
-
 
         private void metroDateTime1_ValueChanged(object sender, EventArgs e)
         {
@@ -386,6 +437,8 @@ namespace Canteen
         }
         private void toolStripTextBox1_TextChanged(object sender, EventArgs e)
         {
+            DataTableDish = new DataTable();
+            GridViewDishList.DataSource = new BindingSource(DataTableDish, null);
             switch (TypeOperation)
             {
                 case 1: goto case 2;
@@ -400,7 +453,7 @@ namespace Canteen
                 case 3: goto case 4;
                 case 4:
                     {
-                        var date = metroDateTime1.Value.ToShortDateString();
+                        string date = metroDateTime1.Value.ToShortDateString();
                         DataTableDish.Clear();
                         DataAdapterDish = SqlConnection.QueryForDataAdapter(QuerySearchDishSale);
                         DataAdapterDish.SelectCommand.Parameters.AddWithValue("@dishName", $@"%{toolStripTextBox1.Text}%");
@@ -408,13 +461,23 @@ namespace Canteen
                         DataAdapterDish.Fill(DataTableDish);
                         break;
                     }
+                case 5:
+                    {
+                        DataTableDish.Clear();
+                        DataAdapterDish = SqlConnection.QueryForDataAdapter(QueryFindProductComming);
+                        DataAdapterDish.SelectCommand.Parameters.AddWithValue("@name", $@"%{toolStripTextBox1.Text}%");
+                        DataAdapterDish.Fill(DataTableDish);
+                        break;
+                    }
             }
+            GridViewDishList.Columns[0].Width = 200;
 
         }
 
         private void metroComboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
             TypeOperation = metroComboBox1.SelectedIndex;
+            UpdateHeaderAddDishTable();
             UpdateDishGrid();
         }
     }

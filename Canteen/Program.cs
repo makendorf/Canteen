@@ -41,7 +41,7 @@ namespace Canteen
             }
         }
         [STAThread]
-        static void Main()
+        private static void Main()
         {
             try
             {

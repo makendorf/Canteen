@@ -5,7 +5,7 @@ namespace Canteen
 {
     public partial class Report : Form
     {
-        SQL SqlConnection = new SQL();
+        private readonly SQL SqlConnection = new SQL();
         private int TypeOperation;
         private readonly string QueryTypeOperation =
             "select * from TypeOperation";
@@ -15,7 +15,7 @@ namespace Canteen
         }
         private void UpdateCBTypeOperation()
         {
-            using (var reader = SqlConnection.ExecuteQuery(QueryTypeOperation))
+            using (System.Data.SqlClient.SqlDataReader reader = SqlConnection.ExecuteQuery(QueryTypeOperation))
             {
                 if (reader.HasRows)
                 {

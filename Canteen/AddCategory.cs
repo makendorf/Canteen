@@ -13,7 +13,7 @@ namespace Canteen
         private readonly string QueryUpdateCategory = "select name as Категория from CategoryList order by name";
         private readonly string QueryInsertCategory = "insert into CategoryList (name) " +
             "values (@name)";
-        private DataTable DataTableCategory = new DataTable();
+        private readonly DataTable DataTableCategory = new DataTable();
         private SqlDataAdapter DataAdapterCategory;
 
         private void UpdateDataTableCategory()

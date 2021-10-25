@@ -18,7 +18,7 @@ namespace Canteen
             "Order by date desc, typeOperation.name asc";
 
 
-        private DataTable DataTableProductionSale = new DataTable();
+        private readonly DataTable DataTableProductionSale = new DataTable();
 
         private SqlDataAdapter DataAdapterProductionSale;
 
@@ -38,14 +38,14 @@ namespace Canteen
 
         private void metroButton1_Click(object sender, EventArgs e)
         {
-            var productionsForm = new AddProductionSale();
+            AddProductionSale productionsForm = new AddProductionSale();
             productionsForm.ShowDialog();
             UpdateDGProductionSale();
         }
 
         private void metroButton2_Click(object sender, EventArgs e)
         {
-            var productionsForm = new AddProductionSale();
+            AddProductionSale productionsForm = new AddProductionSale();
             productionsForm.ShowDialog();
             UpdateDGProductionSale();
         }

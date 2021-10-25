@@ -51,27 +51,27 @@ namespace Canteen
 
         private void AddProductFromRightGrid()
         {
-            using (var selectQuantityForm = new SelectQuantity("кг / 1 порция"))
+            using (SelectQuantity selectQuantityForm = new SelectQuantity("кг / 1 порция"))
             {
-                var result = selectQuantityForm.ShowDialog();
+                DialogResult result = selectQuantityForm.ShowDialog();
                 if (result == DialogResult.OK)
                 {
                     if (GridViewProductList.SelectedRows.Count > 0)
                     {
-                        var Value = selectQuantityForm.ReturnValue;
-                        var Name = GridViewProductList.Rows[GridViewProductList.SelectedRows[0].Index].Cells[0].Value;
+                        string Value = selectQuantityForm.ReturnValue;
+                        object Name = GridViewProductList.Rows[GridViewProductList.SelectedRows[0].Index].Cells[0].Value;
 
-                        var _row = DataTableAddProducts.NewRow();
+                        DataRow _row = DataTableAddProducts.NewRow();
                         _row["Продукт"] = Name;
                         _row["Количество"] = Value;
                         DataTableAddProducts.Rows.Add(_row);
                     }
                     else
                     {
-                        var Value = selectQuantityForm.ReturnValue;
-                        var Name = GridViewProductList.SelectedCells[0].Value;
+                        string Value = selectQuantityForm.ReturnValue;
+                        object Name = GridViewProductList.SelectedCells[0].Value;
 
-                        var _row = DataTableAddProducts.NewRow();
+                        DataRow _row = DataTableAddProducts.NewRow();
                         _row["Продукт"] = Name;
                         _row["Количество"] = Value;
                         DataTableAddProducts.Rows.Add(_row);
@@ -87,8 +87,8 @@ namespace Canteen
 
         private void metroButton2_Click(object sender, EventArgs e)
         {
-            var dishName = metroTextBox1.Text;
-            var Id = FindDish(dishName);
+            string dishName = metroTextBox1.Text;
+            int Id = FindDish(dishName);
             if (Id == 0)
             {
                 try
@@ -114,7 +114,7 @@ namespace Canteen
                     new SqlParameter("@name", $@"{str}"),
                     new SqlParameter("@commit", $@"{metroTextBox2.Text}")
                 });
-            var count = SqlConnection.ExecuteNonQuery(QueryInsertDish);
+            int count = SqlConnection.ExecuteNonQuery(QueryInsertDish);
         }
 
         private int FindDish(string str)
@@ -122,11 +122,12 @@ namespace Canteen
             SqlConnection.SetSqlParameters(new List<SqlParameter> {
                     new SqlParameter("@dish", $@"{str}")
                 });
-            using (var reader = SqlConnection.ExecuteQuery(QueryFindDish))
+            using (SqlDataReader reader = SqlConnection.ExecuteQuery(QueryFindDish))
+            {
                 if (reader.HasRows)
                 {
                     reader.Read();
-                    var Id = reader.GetInt32(0);
+                    int Id = reader.GetInt32(0);
                     reader.Close();
                     return Id;
                 }
@@ -134,6 +135,7 @@ namespace Canteen
                 {
                     return 0;
                 }
+            }
         }
 
         private void AddRecipeMethod(int idDish)
@@ -157,12 +159,15 @@ namespace Canteen
 
         private void metroTextBox2_Click(object sender, EventArgs e)
         {
-            if (metroTextBox2.Text == "Введите технологию приготовления сюда") metroTextBox2.Text = "";
+            if (metroTextBox2.Text == "Введите технологию приготовления сюда")
+            {
+                metroTextBox2.Text = "";
+            }
         }
 
         private void metroButton4_Click(object sender, EventArgs e)
         {
-            var addProduct = new AddProduct();
+            AddProduct addProduct = new AddProduct();
             addProduct.ShowDialog();
             UpdateDataTableProducts();
         }
