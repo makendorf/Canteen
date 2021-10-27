@@ -22,10 +22,20 @@ namespace Canteen
                                 "where type = (select top 1 Id from TypeOperation where name like @type) and date = @date and Dish.name like @dishName " +
                                 "group by prod.name " +
                                 "order by prod.name";
+        private readonly string QueryUpdateMovementProductionProductAsComming =
+                                "select prod.name as Продукт, quantity as КГ from ProductsQuantity " +
+                                "left join ProductsList as prod on prod.Id = ProductsQuantity.product_id " +
+            "where ProductsQuantity.product_id = (select top 1 Id from ProductsList where name like @dishName)";
+        private readonly string QueryUpdateInventirization =
+                                "select quantity as 'Фактический остаток', calcremains 'Расчетный остаток', difference as 'Разница' from Movement " +
+            "left join ProductsList as prod on prod.Id = Movement.product " +
+            "left join TypeOperation as typeOper on typeOper.Id = Movement.type " +
+            "where type = 6 and Movement.date = @date and Movement.product = (select top 1 Id from ProductsList where name like @dishName) " +
+            "order by date desc";
 
 
         private readonly DataTable DataTableMovement = new DataTable();
-        private readonly DataTable DataTableMovementProductionProduct = new DataTable();
+        private DataTable DataTableMovementProductionProduct = new DataTable();
 
         private SqlDataAdapter DataAdapterMovement;
         private SqlDataAdapter DataAdapterMovementProductionProduct;
@@ -47,39 +57,67 @@ namespace Canteen
             movementProductionProductDataGrid.DataSource = new BindingSource(DataTableMovementProductionProduct, null);
             movementDataGrid.DataSource = new BindingSource(DataTableMovement, null);
             UpdateDataTableMovement();
-
-            UpdatePanel();
-
         }
         public void UpdatePanel()
         {
-            ProductAndRecipe productAndRecipeForm = new ProductAndRecipe()
+            switch (tabControl1.SelectedIndex)
             {
-                Dock = DockStyle.Fill,
-                TopLevel = false,
-                FormBorderStyle = FormBorderStyle.None
-            };
-            tabControl1.TabPages[1].Controls.Add(productAndRecipeForm);
-            productAndRecipeForm.Show();
-
-            ProductionSale productionSaleForm = new ProductionSale()
-            {
-                Dock = DockStyle.Fill,
-                TopLevel = false,
-                FormBorderStyle = FormBorderStyle.None
-            };
-            tabControl1.TabPages[2].Controls.Add(productionSaleForm);
-            productionSaleForm.Show();
-
-            Report reportForm = new Report()
-            {
-                Dock = DockStyle.Fill,
-                TopLevel = false,
-                FormBorderStyle = FormBorderStyle.None,
-                StartPosition = FormStartPosition.CenterParent
-            };
-            tabControl1.TabPages[3].Controls.Add(reportForm);
-            reportForm.Show();
+                case 0:
+                    {
+                        UpdateDataTableMovement();
+                        break;
+                    }
+                case 1:
+                    {
+                        ProductAndRecipe productAndRecipeForm = new ProductAndRecipe()
+                        {
+                            Dock = DockStyle.Fill,
+                            TopLevel = false,
+                            FormBorderStyle = FormBorderStyle.None
+                        };
+                        tabControl1.TabPages[1].Controls.Add(productAndRecipeForm);
+                        productAndRecipeForm.Show();
+                        break;
+                    }
+                case 2:
+                    {
+                        ProductionSale productionSaleForm = new ProductionSale()
+                        {
+                            Dock = DockStyle.Fill,
+                            TopLevel = false,
+                            FormBorderStyle = FormBorderStyle.None
+                        };
+                        tabControl1.TabPages[2].Controls.Add(productionSaleForm);
+                        productionSaleForm.Show();
+                        break;
+                    }
+                case 3:
+                    {
+                        Report reportForm = new Report()
+                        {
+                            Dock = DockStyle.Fill,
+                            TopLevel = false,
+                            FormBorderStyle = FormBorderStyle.None,
+                            StartPosition = FormStartPosition.CenterParent
+                        };
+                        tabControl1.TabPages[3].Controls.Add(reportForm);
+                        reportForm.Show();
+                        break;
+                    }
+                case 4:
+                    {
+                        Inventarization inventarizationForm = new Inventarization()
+                        {
+                            Dock = DockStyle.Fill,
+                            TopLevel = false,
+                            FormBorderStyle = FormBorderStyle.None,
+                            StartPosition = FormStartPosition.CenterParent
+                        };
+                        tabControl1.TabPages[4].Controls.Add(inventarizationForm);
+                        inventarizationForm.Show();
+                        break;
+                    }
+            }
         }
         private void UpdateDataTableMovement()
         {
@@ -92,29 +130,46 @@ namespace Canteen
         }
         private void UpdateDataTableMovementProductionProduct()
         {
-            DataTableMovementProductionProduct.Clear();
-            DataAdapterMovementProductionProduct = SqlConnection.QueryForDataAdapter(QueryUpdateMovementProductionProduct);
-            DataAdapterMovementProductionProduct.SelectCommand.Parameters.AddWithValue("@dishName", $@"%{movementDataGrid.SelectedRows[0].Cells[2].Value.ToString().Trim()}%");
-            DataAdapterMovementProductionProduct.SelectCommand.Parameters.AddWithValue("@type", $@"%{movementDataGrid.SelectedRows[0].Cells[0].Value.ToString().Trim()}%");
-            DataAdapterMovementProductionProduct.SelectCommand.Parameters.AddWithValue("@date", movementDataGrid.SelectedRows[0].Cells[1].Value);
-            DataAdapterMovementProductionProduct.Fill(DataTableMovementProductionProduct);
-            DataTableMovementProductionProduct.Rows.Add("Итого:", SummWeighOnePerson());
-            //switch (movementDataGrid.SelectedRows[0].Cells[0].Value.ToString().Trim())
-            //{
-            //    case "Без операции": { break; }
-            //    case "Производство": {
-            //            DataAdapterMovementProductionProduct = SqlConnection.QueryForDataAdapter(QueryUpdateMovementProductionProduct);
-            //            DataAdapterMovementProductionProduct.SelectCommand.Parameters.AddWithValue("@dishName", $@"%{movementDataGrid.SelectedRows[0].Cells[2].Value.ToString().Trim()}%");
-            //            DataAdapterMovementProductionProduct.SelectCommand.Parameters.AddWithValue("@type", $@"%{movementDataGrid.SelectedRows[0].Cells[0].Value.ToString().Trim()}%");
-            //            DataAdapterMovementProductionProduct.SelectCommand.Parameters.AddWithValue("@date", $@"%{movementDataGrid.SelectedRows[0].Cells[1].Value.ToString().Trim()}%");
-            //            DataAdapterMovementProductionProduct.Fill(DataTableMovementProductionProduct);
-            //            DataTableMovementProductionProduct.Rows.Add("Итого:", SummWeighOnePerson());
-            //            break;
-            //        }
-            //    case "Продажа": { break; }
-            //    case "Приход": { break; }
-            //    case "Инвентаризация": { break; }
-            //}
+            DataTableMovementProductionProduct = new DataTable();
+            movementProductionProductDataGrid.DataSource = new BindingSource(DataTableMovementProductionProduct, null);
+            string type = movementDataGrid.SelectedRows[0].Cells[0].Value.ToString().Trim();
+            switch (type)
+            {
+                case "Без операции": { break; }
+                case "Производство (малый зал)":
+                    {
+                        DataAdapterMovementProductionProduct = SqlConnection.QueryForDataAdapter(QueryUpdateMovementProductionProduct);
+                        DataAdapterMovementProductionProduct.SelectCommand.Parameters.AddWithValue("@dishName", $@"%{movementDataGrid.SelectedRows[0].Cells[2].Value.ToString().Trim()}%");
+                        DataAdapterMovementProductionProduct.SelectCommand.Parameters.AddWithValue("@type", $@"%{movementDataGrid.SelectedRows[0].Cells[0].Value.ToString().Trim()}%");
+                        DataAdapterMovementProductionProduct.SelectCommand.Parameters.AddWithValue("@date", movementDataGrid.SelectedRows[0].Cells[1].Value);
+                        DataAdapterMovementProductionProduct.Fill(DataTableMovementProductionProduct);
+                        DataTableMovementProductionProduct.Rows.Add("Итого:", SummWeighOnePerson());
+                        break;
+                    }
+                case "Производство (большой зал)": goto case "Производство (малый зал)";
+                case "Продажа (малый зал)": goto case "Производство (малый зал)";
+                case "Продажа (большой зал)": goto case "Производство (малый зал)";
+                case "Приход":
+                    {
+                        DataAdapterMovementProductionProduct = SqlConnection.QueryForDataAdapter(QueryUpdateMovementProductionProductAsComming);
+                        DataAdapterMovementProductionProduct.SelectCommand.Parameters.AddWithValue("@dishName", $@"%{movementDataGrid.SelectedRows[0].Cells[2].Value.ToString().Trim()}%");
+                        DataAdapterMovementProductionProduct.SelectCommand.Parameters.AddWithValue("@date", movementDataGrid.SelectedRows[0].Cells[1].Value);
+                        DataAdapterMovementProductionProduct.Fill(DataTableMovementProductionProduct);
+                        break;
+                    }
+                case "Перевеска": 
+                    {
+                        DataAdapterMovementProductionProduct = SqlConnection.QueryForDataAdapter(QueryUpdateInventirization);
+                        DataAdapterMovementProductionProduct.SelectCommand.Parameters.AddWithValue("@dishName", $@"%{movementDataGrid.SelectedRows[0].Cells[2].Value.ToString().Trim()}%");
+                        DataAdapterMovementProductionProduct.SelectCommand.Parameters.AddWithValue("@date", System.Convert.ToDateTime(movementDataGrid.SelectedRows[0].Cells[1].Value));
+                        DataAdapterMovementProductionProduct.Fill(DataTableMovementProductionProduct);
+                        break; 
+                    }
+            }
+            
+            
+            
+           
         }
 
         private double SummWeighOnePerson()
@@ -161,10 +216,7 @@ namespace Canteen
 
         private void tabControl1_SelectedIndexChanged(object sender, System.EventArgs e)
         {
-            if (tabControl1.SelectedIndex == 0)
-            {
-                UpdateDataTableMovement();
-            }
+            UpdatePanel();
         }
 
         private void movementDataGrid_CellClick(object sender, DataGridViewCellEventArgs e)
@@ -172,6 +224,5 @@ namespace Canteen
             movementDataGrid.Rows[movementDataGrid.CurrentCell.RowIndex].Selected = true;
             UpdateDataTableMovementProductionProduct();
         }
-
     }
 }

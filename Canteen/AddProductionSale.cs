@@ -59,7 +59,7 @@ namespace Canteen
         private readonly string QueryUpdateRemainsForProduction = 
             "update ProductionSale set remains = @remains where Id = @id";
         private readonly string QueryUpdateProductQuantity =
-            "update ProductsQuantity set quantity = @quantity " +
+            "update ProductsQuantity set quantity = quantity + @quantity " +
             "where product_id = (select top 1 Id from ProductsList where name like @name)";
         private readonly string QueryInsertMovementСomingProduct =
             "insert into Movement (type, date, product, quantity) values " +
@@ -100,6 +100,7 @@ namespace Canteen
                         DataTableAddDish.Columns.Add("Количество");
                         break;
                     }
+                case 6: goto case 5;
                 default:
                     {
                         DataTableAddDish.Columns.Add("Блюдо");
@@ -139,7 +140,7 @@ namespace Canteen
                     {
                         DataAdapterDish = SqlConnection.QueryForDataAdapter(QueryUpdateDishSale);
                         DataAdapterDish.SelectCommand.Parameters.AddWithValue("@date", metroDateTime1.Value);
-                        DataAdapterDish.SelectCommand.Parameters.AddWithValue("@type", 1);
+                        DataAdapterDish.SelectCommand.Parameters.AddWithValue("@type", SelectTypeProductionInTypeSale());
                         break;
                     }
                 case 5:
@@ -147,6 +148,7 @@ namespace Canteen
                         DataAdapterDish = SqlConnection.QueryForDataAdapter(QueryUpdateProductComming);
                         break;
                     }
+                case 6: goto case 5;
 
             }
            
@@ -179,6 +181,7 @@ namespace Canteen
                                 _row["Количество"] = Value;
                                 break;
                             }
+                        case 6: goto case 5;
                         default:
                             {
                                 _row["Блюдо"] = Name;
@@ -356,6 +359,12 @@ namespace Canteen
                                 SqlConnection.ExecuteNonQuery(QueryInsertMovementСomingProduct);
                                 break;
                             }
+                        case 6:
+                            {
+                                InsertMovementReweighing(date, name, quantity);
+
+                                break;
+                            }
                     }
                     
                 }
@@ -368,6 +377,97 @@ namespace Canteen
                 SqlConnection.RollBack();
                 MessageBox.Show(exc.Message);
             }
+        }
+
+        private void InsertMovementReweighing(DateTime date, object name, double remains)
+        {
+            SqlConnection.SetSqlParameters(new List<SqlParameter>()
+            {
+                new SqlParameter("@prodName", name)
+            });
+            using (var reader = SqlConnection.ExecuteQuery($"select top 1 Id from ProductsList where name like @prodName"))
+            {
+                if (reader.HasRows)
+                {
+                    reader.Read();
+                    name = reader.GetInt32(0);
+                }
+            }
+            double calcRemains = CalcDifference(date, name);
+            SqlConnection.SetSqlParameters(new List<SqlParameter>()
+            {
+                new SqlParameter("@difference", remains - calcRemains),
+                new SqlParameter("@remains", remains),
+                new SqlParameter("@calcRemains", calcRemains),
+                new SqlParameter("@date", date),
+                new SqlParameter("@type", TypeOperation),
+                new SqlParameter("@name", name)
+            });
+            SqlConnection.ExecuteNonQuery($"insert into Movement (type, date, product, quantity, difference, calcremains) values (@type, @date, @name, @remains, @difference, @calcRemains)");
+            SqlConnection.SetSqlParameters(new List<SqlParameter>()
+            {
+                new SqlParameter("@quantity", remains),
+                new SqlParameter("@name", name)
+            });
+            SqlConnection.ExecuteNonQuery("update ProductsQuantity set quantity = @quantity where product_id = @name");
+        }
+
+        private double CalcDifference(DateTime date, object name)
+        {
+            double lastReweighing = 0;
+            double summComming = 0;
+            double summProduction = 0;
+            
+            SqlConnection.SetSqlParameters(new List<SqlParameter>()
+            {
+                new SqlParameter("@prodName", name),
+                new SqlParameter("@type", 6)
+            });
+            using (var reader = SqlConnection.ExecuteQuery($"select top 1 quantity from Movement where product = @prodName and type = @type order by date desc"))
+            {
+                if (reader.HasRows)
+                {
+                    reader.Read();
+                    lastReweighing = reader.GetDouble(0);
+                }
+            }
+            string _date = date.AddMonths(-1).ToString("yyyy-MM-") + "%";
+            SqlConnection.SetSqlParameters(new List<SqlParameter>()
+            {
+                new SqlParameter("@date", _date),
+                new SqlParameter("@prodName", name),
+                new SqlParameter("@type", 5)
+            });
+            using (var reader = SqlConnection.ExecuteQuery($"select sum(quantity) from Movement where date like @date and product = @prodName and type = @type"))
+            {
+                try
+                {
+                    if (reader.HasRows)
+                    {
+                        reader.Read();
+                        summComming = reader.GetDouble(0);
+                    }
+                }
+                catch { }
+            }
+            SqlConnection.SetSqlParameters(new List<SqlParameter>()
+            {
+                new SqlParameter("@date", _date),
+                new SqlParameter("@prodName", name)
+            });
+            using (var reader = SqlConnection.ExecuteQuery($"select sum(quantity) from Movement where date like @date and product = @prodName and type in (1, 2)"))
+            {
+                try
+                {
+                    if (reader.HasRows)
+                    {
+                        reader.Read();
+                        summProduction = reader.GetDouble(0);
+                    }
+                }
+                catch { }
+            }
+            return lastReweighing + summComming - summProduction;
         }
 
         private void InsertMovement(DateTime date, object dishName, double quantity, double remainsLastDay)
@@ -386,11 +486,18 @@ namespace Canteen
                         int productId = reader.GetInt32(0);
                         int category = reader.GetInt32(2);
                         dynamic quantityKg = 0;
+                        
                         switch (category)
                         {
                             case 10008:
                                 {
                                     quantityKg = quantity;
+                                    SqlConnection.SetSqlParameters(new List<SqlParameter>()
+                                    {
+                                        new SqlParameter("@quantity", quantityKg),
+                                        new SqlParameter("@name", productId)
+                                    });
+                                    SqlConnection.ExecuteNonQuery($"update ProductsQuantity set quantity = quantity - @quantity where product_id = @name");
                                     break;
                                 }
                             default:
@@ -401,6 +508,12 @@ namespace Canteen
                                         case 2:
                                             {
                                                 quantityKg = Math.Round(reader.GetDouble(1) * quantity, 3);
+                                                SqlConnection.SetSqlParameters(new List<SqlParameter>()
+                                                {
+                                                    new SqlParameter("@quantity", quantityKg),
+                                                    new SqlParameter("@name", productId)
+                                                });
+                                                SqlConnection.ExecuteNonQuery($"update ProductsQuantity set quantity = quantity - @quantity where product_id = @name ");
                                                 break;
                                             }
                                         case 3: goto case 4;

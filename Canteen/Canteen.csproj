@@ -95,6 +95,12 @@
     <Compile Include="AddProductionSale.Designer.cs">
       <DependentUpon>AddProductionSale.cs</DependentUpon>
     </Compile>
+    <Compile Include="Inventarization.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Inventarization.Designer.cs">
+      <DependentUpon>Inventarization.cs</DependentUpon>
+    </Compile>
     <Compile Include="ReportXLMS.cs" />
     <Compile Include="ProductionSale.cs">
       <SubType>Form</SubType>
@@ -144,6 +150,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="AddProductionSale.resx">
       <DependentUpon>AddProductionSale.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Inventarization.resx">
+      <DependentUpon>Inventarization.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ProductionSale.resx">
       <DependentUpon>ProductionSale.cs</DependentUpon>

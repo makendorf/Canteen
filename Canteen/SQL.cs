@@ -24,8 +24,8 @@ namespace Canteen
         }
         private string GetConnectionString()
         {
-            string connString = Properties.Settings.Default.canteenConnectionString;
-            //var connString = Properties.Settings.Default.canteenTestConnectionString;
+            //string connString = Properties.Settings.Default.canteenConnectionString;
+            var connString = Properties.Settings.Default.canteenTestConnectionString;
             return connString;
         }
         public void BeginTransaction(SqlTransaction transaction = null)

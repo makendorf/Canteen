@@ -8,7 +8,7 @@ namespace Canteen
         private readonly SQL SqlConnection = new SQL();
         private int TypeOperation;
         private readonly string QueryTypeOperation =
-            "select * from TypeOperation";
+            "select * from TypeReports";
         public Report()
         {
             InitializeComponent();

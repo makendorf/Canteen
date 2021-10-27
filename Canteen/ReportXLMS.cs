@@ -130,7 +130,6 @@ namespace Canteen
                     });
                     using (SqlDataReader reader = SqlConnection.ExecuteQuery(QueryFindValueProductInDish))
                     {
-                        Kniga.Visible = true;
                         if (reader.HasRows)
                         {
                             double summPerDay = 0;
@@ -161,7 +160,7 @@ namespace Canteen
             }
 
 
-            Kniga.Visible = true;
+            
             for (int i = 1; i <= ProductList.Count; i++)
             {
                 List.Cells[i + 4, 1] = i;
@@ -170,9 +169,9 @@ namespace Canteen
             FullBorders();
             Range = GetRange(List.Cells[3, 3], List.Cells[ProductList.Count + 4, DishList.Count + 2]);
             Range.HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter;
-            List.Cells[ProductList.Count + 6, 2] = "Заведущий столовой";
-            List.Cells[ProductList.Count + 6, 4] = "___________/____________";
-
+            List.Cells[ProductList.Count + 7, 2] = "Заведущий столовой";
+            List.Cells[ProductList.Count + 7, 4] = "___________/____________";
+            Kniga.Visible = true;
             SaveDocument();
             ClearCOM();
         }
