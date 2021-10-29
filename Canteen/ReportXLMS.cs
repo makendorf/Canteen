@@ -34,6 +34,8 @@ namespace Canteen
                                 "left join DishList as Dish on Dish.Id = Movement.dish " +
                                 "where type = @type and date = @date " +
                                 "group by prod.name ";
+        private readonly string QueryUpdateInventirization =
+                        "select * from dbo.Reweigh order by Reweigh.Продукт";
         private readonly SQL SqlConnection = new SQL();
         public ReportXLMS(int typeDocument, DateTime date)
         {
@@ -47,7 +49,66 @@ namespace Canteen
             List = (Excel.Worksheet)Kniga.Worksheets.get_Item(1);
             List.PageSetup.Orientation = Excel.XlPageOrientation.xlLandscape;
         }
+        public void Reweigh()
+        {
+            System.Data.DataTable table = new System.Data.DataTable();
+            SqlDataAdapter sqlData = SqlConnection.QueryForDataAdapter(QueryUpdateInventirization);
+            sqlData.Fill(table);
+            ExportToExcel(table);
+        }
+        private int ExportToExcel(System.Data.DataTable tbl, System.Data.DataTable tb2, bool exit = true)
+        {
+            try
+            {
+                for (var i = tbl.Columns.Count; i < tbl.Columns.Count + tb2.Columns.Count; i++)
+                {
+                    List.Cells[1, i + 1] = tb2.Columns[i - tbl.Columns.Count].ColumnName;
+                }
 
+                for (var i = 0; i < tb2.Rows.Count; i++)
+                {
+                    for (var j = tbl.Columns.Count; j < tbl.Columns.Count + tb2.Columns.Count; j++)
+                    {
+                        List.Cells[i + 2, j + 1] = tb2.Rows[i][j];
+                    }
+                }
+                Kniga.Visible = true;
+                SaveDocument();
+            }
+            finally
+            {
+                if(exit) ClearCOM();
+            }
+            return 0;
+        }
+        private int ExportToExcel(System.Data.DataTable tbl)
+        {
+            try
+            {
+                if (tbl == null || tbl.Columns.Count == 0)
+                    return 0;
+
+                for (var i = 0; i < tbl.Columns.Count; i++)
+                {
+                    List.Cells[1, i + 1] = tbl.Columns[i].ColumnName;
+                }
+
+                for (var i = 0; i < tbl.Rows.Count; i++)
+                {
+                    for (var j = 0; j < tbl.Columns.Count; j++)
+                    {
+                        List.Cells[i + 2, j + 1] = tbl.Rows[i][j];
+                    }
+                }
+                Kniga.Visible = true;
+                SaveDocument();
+            }
+            finally
+            {
+                ClearCOM();
+            }
+            return 0;
+        }
         public void BookkeepingReport()
         {
             List<List<string>> ProductList = new List<List<string>>();
@@ -246,7 +307,7 @@ namespace Canteen
         {
             
             string TypeName = "";
-            using (SqlDataReader reader = SqlConnection.ExecuteQuery($@"select name from TypeOperation where Id = {TypeDocument}"))
+            using (SqlDataReader reader = SqlConnection.ExecuteQuery($@"select name from TypeReports where Id = {TypeDocument}"))
             {
                 reader.Read();
                 TypeName = reader.GetString(0);

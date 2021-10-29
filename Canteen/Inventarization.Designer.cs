@@ -38,10 +38,11 @@ namespace Canteen
             this.dataGridInventarization.AllowUserToAddRows = false;
             this.dataGridInventarization.AllowUserToDeleteRows = false;
             this.dataGridInventarization.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridInventarization.Location = new System.Drawing.Point(12, 12);
+            this.dataGridInventarization.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dataGridInventarization.Location = new System.Drawing.Point(0, 0);
             this.dataGridInventarization.Name = "dataGridInventarization";
             this.dataGridInventarization.ReadOnly = true;
-            this.dataGridInventarization.Size = new System.Drawing.Size(762, 418);
+            this.dataGridInventarization.Size = new System.Drawing.Size(800, 450);
             this.dataGridInventarization.TabIndex = 0;
             // 
             // Inventarization

@@ -6,7 +6,7 @@ namespace Canteen
     public partial class Report : Form
     {
         private readonly SQL SqlConnection = new SQL();
-        private int TypeOperation;
+        private int TypeReport;
         private readonly string QueryTypeOperation =
             "select * from TypeReports";
         public Report()
@@ -25,12 +25,29 @@ namespace Canteen
                     }
                 }
             }
-            metroComboBox1.SelectedIndex = TypeOperation = 1;
+            metroComboBox1.SelectedIndex = TypeReport = 1;
         }
         private void metroButton1_Click(object sender, EventArgs e)
         {
-            ReportXLMS report = new ReportXLMS(TypeOperation, metroDateTime1.Value);
-            report.BookkeepingReport();
+            
+            switch (TypeReport)
+            {
+                case 1:
+                    {
+                        ReportXLMS report = new ReportXLMS(TypeReport, metroDateTime1.Value);
+                        report.BookkeepingReport();
+                        break;
+                    }
+                case 2: goto case 1;
+                case 3: goto case 1;
+                case 4: goto case 1;
+                case 6:
+                    {
+                        ReportXLMS report = new ReportXLMS(TypeReport, metroDateTime1.Value);
+                        report.Reweigh();
+                        break;
+                    }
+            }
         }
         private void Report_Load(object sender, EventArgs e)
         {
@@ -39,7 +56,7 @@ namespace Canteen
         }
         private void metroComboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            TypeOperation = metroComboBox1.SelectedIndex;
+            TypeReport = metroComboBox1.SelectedIndex;
         }
     }
 }

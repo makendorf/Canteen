@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Data.SqlClient;
 
-namespace Canteen
+namespace CanteenMonitor
 {
     public class SQL
     {
@@ -24,8 +24,8 @@ namespace Canteen
         }
         private string GetConnectionString()
         {
-            //string connString = Properties.Settings.Default.canteenConnectionString;
-            var connString = Properties.Settings.Default.canteenTestConnectionString;
+            string connString = "Password=canteen;Persist Security Info=True;User ID=canteen;Initial Catalog=cante" +
+            "en;Data Source=swms22up.gah.local";
             return connString;
         }
         public void BeginTransaction(SqlTransaction transaction = null)

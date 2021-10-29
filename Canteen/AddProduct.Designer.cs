@@ -37,8 +37,10 @@ namespace Canteen
             this.metroPanel1 = new MetroFramework.Controls.MetroPanel();
             this.GridViewProductList = new System.Windows.Forms.DataGridView();
             this.metroButton2 = new MetroFramework.Controls.MetroButton();
+            this.metroPanel2 = new MetroFramework.Controls.MetroPanel();
             this.metroPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.GridViewProductList)).BeginInit();
+            this.metroPanel2.SuspendLayout();
             this.SuspendLayout();
             // 
             // metroLabel1
@@ -130,9 +132,10 @@ namespace Canteen
             // GridViewProductList
             // 
             this.GridViewProductList.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.GridViewProductList.Location = new System.Drawing.Point(32, 206);
+            this.GridViewProductList.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.GridViewProductList.Location = new System.Drawing.Point(0, 0);
             this.GridViewProductList.Name = "GridViewProductList";
-            this.GridViewProductList.Size = new System.Drawing.Size(240, 292);
+            this.GridViewProductList.Size = new System.Drawing.Size(263, 312);
             this.GridViewProductList.TabIndex = 6;
             // 
             // metroButton2
@@ -145,13 +148,30 @@ namespace Canteen
             this.metroButton2.UseSelectable = true;
             this.metroButton2.Click += new System.EventHandler(this.metroButton2_Click);
             // 
+            // metroPanel2
+            // 
+            this.metroPanel2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.metroPanel2.Controls.Add(this.GridViewProductList);
+            this.metroPanel2.HorizontalScrollbarBarColor = true;
+            this.metroPanel2.HorizontalScrollbarHighlightOnWheel = false;
+            this.metroPanel2.HorizontalScrollbarSize = 10;
+            this.metroPanel2.Location = new System.Drawing.Point(23, 198);
+            this.metroPanel2.Name = "metroPanel2";
+            this.metroPanel2.Size = new System.Drawing.Size(263, 312);
+            this.metroPanel2.TabIndex = 8;
+            this.metroPanel2.VerticalScrollbarBarColor = true;
+            this.metroPanel2.VerticalScrollbarHighlightOnWheel = false;
+            this.metroPanel2.VerticalScrollbarSize = 10;
+            // 
             // AddProduct
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(309, 518);
+            this.Controls.Add(this.metroPanel2);
             this.Controls.Add(this.metroButton2);
-            this.Controls.Add(this.GridViewProductList);
             this.Controls.Add(this.metroPanel1);
             this.Name = "AddProduct";
             this.Text = "Добавить продукт";
@@ -159,6 +179,7 @@ namespace Canteen
             this.metroPanel1.ResumeLayout(false);
             this.metroPanel1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.GridViewProductList)).EndInit();
+            this.metroPanel2.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -173,5 +194,6 @@ namespace Canteen
         private MetroFramework.Controls.MetroPanel metroPanel1;
         private System.Windows.Forms.DataGridView GridViewProductList;
         private MetroFramework.Controls.MetroButton metroButton2;
+        private MetroFramework.Controls.MetroPanel metroPanel2;
     }
 }

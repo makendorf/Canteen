@@ -11,7 +11,7 @@ namespace Canteen
     public partial class AddProduct : MetroForm
     {
         private readonly SQL SqlConnection = new SQL();
-        private readonly string QueryUpdateProductList = "select name as Продукт from ProductsList order by name";
+        private readonly string QueryUpdateProductList = "select ProductsList.name as Продукт, CategoryList.name as Категория from ProductsList left join CategoryList on CategoryList.Id = ProductsList.category order by ProductsList.name";
         private readonly string QueryInsertProductList = "insert into ProductsList (name, category) " +
             "values (@name, (select top 1 Id from CategoryList where name like @category)); " +
             "insert into ProductsQuantity (product_id) " +

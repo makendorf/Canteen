@@ -44,7 +44,7 @@ namespace Canteen
             "@productId, " +
             "@quantity)";
         private readonly string QueryFindProductFromDish =
-            "select product, norm, prod.category from RecipeList " +
+            "select product, norm, prod.category, prod.name from RecipeList " +
             "left join ProductsList as prod on prod.Id = RecipeList.product " +
             "where dish = (select TOP 1 Id from DishList where name like @dishName) order by RecipeList.product";
         private readonly string QueryFindSummRemains = "select sum(remains) from ProductionSale " +
@@ -396,9 +396,9 @@ namespace Canteen
             double calcRemains = CalcDifference(date, name);
             SqlConnection.SetSqlParameters(new List<SqlParameter>()
             {
-                new SqlParameter("@difference", remains - calcRemains),
-                new SqlParameter("@remains", remains),
-                new SqlParameter("@calcRemains", calcRemains),
+                new SqlParameter("@difference", Math.Round(remains - calcRemains, 3)),
+                new SqlParameter("@remains", Math.Round(remains, 3)),
+                new SqlParameter("@calcRemains", Math.Round(calcRemains, 3)),
                 new SqlParameter("@date", date),
                 new SqlParameter("@type", TypeOperation),
                 new SqlParameter("@name", name)
@@ -417,7 +417,16 @@ namespace Canteen
             double lastReweighing = 0;
             double summComming = 0;
             double summProduction = 0;
-            
+
+            string QueryFindProduction = "select sum(quantity) from Movement where " +
+                "type in (1, 2) and " +
+                "(date between CAST((select max(date) from Movement where type = 6 and product = @prodName) as date) and @date) " +
+                "and product = @prodName";
+            string QueryFindComming = "select sum(quantity) from Movement where " +
+               "type = @type and " +
+               "(date between CAST((select max(date) from Movement where type = 6 and product = @prodName) as date) and @date) " +
+               "and product = @prodName";
+
             SqlConnection.SetSqlParameters(new List<SqlParameter>()
             {
                 new SqlParameter("@prodName", name),
@@ -431,14 +440,13 @@ namespace Canteen
                     lastReweighing = reader.GetDouble(0);
                 }
             }
-            string _date = date.AddMonths(-1).ToString("yyyy-MM-") + "%";
             SqlConnection.SetSqlParameters(new List<SqlParameter>()
             {
-                new SqlParameter("@date", _date),
+                new SqlParameter("@date", date),
                 new SqlParameter("@prodName", name),
                 new SqlParameter("@type", 5)
             });
-            using (var reader = SqlConnection.ExecuteQuery($"select sum(quantity) from Movement where date like @date and product = @prodName and type = @type"))
+            using (var reader = SqlConnection.ExecuteQuery(QueryFindComming))
             {
                 try
                 {
@@ -452,10 +460,10 @@ namespace Canteen
             }
             SqlConnection.SetSqlParameters(new List<SqlParameter>()
             {
-                new SqlParameter("@date", _date),
+                new SqlParameter("@date", date),
                 new SqlParameter("@prodName", name)
             });
-            using (var reader = SqlConnection.ExecuteQuery($"select sum(quantity) from Movement where date like @date and product = @prodName and type in (1, 2)"))
+            using (var reader = SqlConnection.ExecuteQuery(QueryFindProduction))
             {
                 try
                 {
@@ -484,9 +492,10 @@ namespace Canteen
                     while (reader.Read())
                     {
                         int productId = reader.GetInt32(0);
+                        string productName = reader.GetString(3);
                         int category = reader.GetInt32(2);
                         dynamic quantityKg = 0;
-                        
+                        string QueryInsertQuantity = "update ProductsQuantity set quantity = quantity - @quantity where quantity - @quantity > 0 and product_id = @name";
                         switch (category)
                         {
                             case 10008:
@@ -497,7 +506,11 @@ namespace Canteen
                                         new SqlParameter("@quantity", quantityKg),
                                         new SqlParameter("@name", productId)
                                     });
-                                    SqlConnection.ExecuteNonQuery($"update ProductsQuantity set quantity = quantity - @quantity where product_id = @name");
+                                    int countQ = SqlConnection.ExecuteNonQuery(QueryInsertQuantity);
+                                    if (countQ == 0)
+                                    {
+                                        throw new Exception($"На складе недостаточно продукта '{productName}' или продукт отсутствует в базе.");
+                                    }
                                     break;
                                 }
                             default:
@@ -513,7 +526,11 @@ namespace Canteen
                                                     new SqlParameter("@quantity", quantityKg),
                                                     new SqlParameter("@name", productId)
                                                 });
-                                                SqlConnection.ExecuteNonQuery($"update ProductsQuantity set quantity = quantity - @quantity where product_id = @name ");
+                                                int countQ = SqlConnection.ExecuteNonQuery(QueryInsertQuantity);
+                                                if(countQ == 0)
+                                                {
+                                                    throw new Exception($"На складе недостаточно продукта '{productName}' или продукт отсутствует в базе.");
+                                                }
                                                 break;
                                             }
                                         case 3: goto case 4;
