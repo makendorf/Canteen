@@ -9,11 +9,11 @@ namespace CanteenMonitor
     public partial class Form1 : MetroForm
     {
         private readonly SQL SqlConnection = new SQL();
-        private readonly string QueryUpdateProductList = "select date, DishList.Name from ProductionSale " +
-            "left join DishList on DishList.Id = ProductionSale.dish where date = @date";
+        private readonly string QueryUpdateProductList = "select date as Дата, DishList.Name as Блюдо from ProductionSale " +
+            "left join DishList on DishList.Id = ProductionSale.dish where date = @date group by DishList.Name, date";
         private readonly DataTable DataTableProductList = new DataTable();
         private SqlDataAdapter DataAdapterProductList;
-        System.Timers.Timer timer = new System.Timers.Timer(3600000);
+        readonly System.Timers.Timer timer = new System.Timers.Timer(3600000);
         public Form1()
         {
             InitializeComponent();
@@ -22,6 +22,8 @@ namespace CanteenMonitor
         private void Form1_Load(object sender, EventArgs e)
         {
             metroGrid1.DataSource = new BindingSource(DataTableProductList, null);
+            
+
             timer.Elapsed += UpdateDataTableProductList;
             timer.Start();
             UpdateDataTableProductList();
@@ -35,6 +37,8 @@ namespace CanteenMonitor
                 DataAdapterProductList = SqlConnection.QueryForDataAdapter(QueryUpdateProductList);
                 DataAdapterProductList.SelectCommand.Parameters.AddWithValue("@date", DateTime.Now.ToShortDateString());
                 DataAdapterProductList.Fill(DataTableProductList);
+                metroGrid1.DefaultCellStyle.Font = new System.Drawing.Font("Microsoft Sans Serif", 24);
+                metroGrid1.ColumnHeadersDefaultCellStyle.Font = new System.Drawing.Font("Microsoft Sans Serif", 27);
                 metroGrid1.Columns[1].Width = 800;
                 metroGrid1.Columns[0].Width = 200;
                 foreach (DataGridViewRow row in metroGrid1.Rows)
@@ -53,6 +57,9 @@ namespace CanteenMonitor
                 DataAdapterProductList = SqlConnection.QueryForDataAdapter(QueryUpdateProductList);
                 DataAdapterProductList.SelectCommand.Parameters.AddWithValue("@date", DateTime.Now.ToShortDateString());
                 DataAdapterProductList.Fill(DataTableProductList);
+                metroGrid1.DefaultCellStyle.Font = new System.Drawing.Font("Microsoft Sans Serif", 27);
+                metroGrid1.ColumnHeadersDefaultCellStyle.Font = new System.Drawing.Font("Microsoft Sans Serif", 27);
+
                 metroGrid1.Columns[1].Width = 800;
                 metroGrid1.Columns[0].Width = 200;
                 foreach (DataGridViewRow row in metroGrid1.Rows)

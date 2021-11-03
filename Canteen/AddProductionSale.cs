@@ -75,6 +75,7 @@ namespace Canteen
         private DataTable DataTableDish = new DataTable();
         private DataTable DataTableAddDish = new DataTable();
 
+        private string Dish = "", prod = "";
 
         private SqlDataAdapter DataAdapterDish;
         private void AddProduction_Load(object sender, EventArgs e)
@@ -342,6 +343,10 @@ namespace Canteen
                             }
                         case 5:
                             {
+                                if (!CheckInventarisation(name))
+                                {
+                                    throw new Exception($"По '{name}' отсутствует первичная инвентаризация");
+                                }
                                 SqlConnection.SetSqlParameters(new List<SqlParameter>
                                 {
                                     new SqlParameter("@name",  name),
@@ -376,6 +381,25 @@ namespace Canteen
             {
                 SqlConnection.RollBack();
                 MessageBox.Show(exc.Message);
+            }
+        }
+
+        private bool CheckInventarisation(object name)
+        {
+            SqlConnection.SetSqlParameters(new List<SqlParameter>()
+            {
+                new SqlParameter("@name", name)
+            });
+            using(var reader = SqlConnection.ExecuteQuery("select * from Movement left join ProductsList on ProductsList.Id = Movement.product where ProductsList.name like @name and type = 6"))
+            {
+                if (reader.HasRows)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
         }
 
@@ -480,6 +504,7 @@ namespace Canteen
 
         private void InsertMovement(DateTime date, object dishName, double quantity, double remainsLastDay)
         {
+            Dish = dishName.ToString();
             SQL SqlConnProduct = new SQL();
             SqlConnProduct.SetSqlParameters(new List<SqlParameter>
                     {
@@ -495,9 +520,17 @@ namespace Canteen
                         string productName = reader.GetString(3);
                         int category = reader.GetInt32(2);
                         dynamic quantityKg = 0;
+                        double quantityFact = SelectQuantity(productId);
                         string QueryInsertQuantity = "update ProductsQuantity set quantity = quantity - @quantity where quantity - @quantity > 0 and product_id = @name";
+                        string QueryInsertQuantityNotCheck = "update ProductsQuantity set quantity = quantity - @quantity where product_id = @name";
+                        if (!CheckInventarisation(productName))
+                        {
+                            throw new Exception($"По '{productName}' отсутствует первичная инвентаризация");
+                        }
                         switch (category)
                         {
+                            case 10006: goto case 10009;
+                            case 10007: goto case 10009;
                             case 10008:
                                 {
                                     quantityKg = quantity;
@@ -506,13 +539,22 @@ namespace Canteen
                                         new SqlParameter("@quantity", quantityKg),
                                         new SqlParameter("@name", productId)
                                     });
-                                    int countQ = SqlConnection.ExecuteNonQuery(QueryInsertQuantity);
-                                    if (countQ == 0)
-                                    {
-                                        throw new Exception($"На складе недостаточно продукта '{productName}' или продукт отсутствует в базе.");
-                                    }
+                                    int countQ = SqlConnection.ExecuteNonQuery(QueryInsertQuantityNotCheck);
                                     break;
                                 }
+                            case 10009:
+                                {
+
+                                    quantityKg = Math.Round(reader.GetDouble(1) * quantity, 3);
+                                    SqlConnection.SetSqlParameters(new List<SqlParameter>()
+                                    {
+                                        new SqlParameter("@quantity", quantityKg),
+                                        new SqlParameter("@name", productId)
+                                    });
+                                    int countQ = SqlConnection.ExecuteNonQuery(QueryInsertQuantityNotCheck);
+                                    break;
+                                }
+
                             default:
                                 {
                                     switch (TypeOperation)
@@ -529,7 +571,7 @@ namespace Canteen
                                                 int countQ = SqlConnection.ExecuteNonQuery(QueryInsertQuantity);
                                                 if(countQ == 0)
                                                 {
-                                                    throw new Exception($"На складе недостаточно продукта '{productName}' или продукт отсутствует в базе.");
+                                                    throw new Exception($"На складе недостаточно продукта '{productName}': {quantityFact - quantityKg} ({quantityFact}).");
                                                 }
                                                 break;
                                             }
@@ -556,6 +598,25 @@ namespace Canteen
                     }
                 }
             }
+        }
+
+        private double SelectQuantity(int nameID)
+        {
+            var SqlQuantity = new SQL();
+            prod = nameID.ToString();
+            SqlConnection.SetSqlParameters(new List<SqlParameter>()
+            {
+                new SqlParameter("@name", nameID)
+            });
+            using(var reader = SqlConnection.ExecuteQuery("select quantity from ProductsQuantity where product_id = @name"))
+            {
+                if (reader.HasRows)
+                {
+                    reader.Read();
+                    return reader.GetDouble(0);
+                }
+            }
+            return 0;
         }
 
         private void metroDateTime1_ValueChanged(object sender, EventArgs e)
@@ -599,6 +660,7 @@ namespace Canteen
                         DataAdapterDish.Fill(DataTableDish);
                         break;
                     }
+                case 6: goto case 5;
             }
             GridViewDishList.Columns[0].Width = 200;
 
@@ -609,6 +671,12 @@ namespace Canteen
             TypeOperation = metroComboBox1.SelectedIndex;
             UpdateHeaderAddDishTable();
             UpdateDishGrid();
+        }
+
+        private void metroButton1_Click(object sender, EventArgs e)
+        {
+            var addProductForm = new AddProduct();
+            addProductForm.Show();
         }
     }
 }

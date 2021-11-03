@@ -28,6 +28,7 @@ namespace Canteen
             DataAdapterProductList = SqlConnection.QueryForDataAdapter(QueryUpdateProductList);
             DataAdapterProductList.Fill(DataTableProductList);
             GridViewProductList.Columns[0].Width = 190;
+            GridViewProductList.Columns[1].Width = 120;
         }
         private void AddProduct_Load(object sender, EventArgs e)
         {

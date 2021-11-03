@@ -233,23 +233,24 @@ namespace Canteen
         private void metroButton5_Click(object sender, EventArgs e)
         {
             
-            DataGridViewCell cell = DataGridProduct.SelectedRows[0].Cells[0];
-            if (MessageBox.Show($"Действительно удалить '{cell.Value}'", "Внимание!", MessageBoxButtons.YesNo) == DialogResult.Yes)
+            DataGridViewCell cellRecipe = DataGridRecipe.SelectedRows[0].Cells[0];
+            DataGridViewCell cellProduct = DataGridProduct.SelectedRows[0].Cells[0];
+            if (MessageBox.Show($"Действительно удалить '{cellProduct.Value}'", "Внимание!", MessageBoxButtons.YesNo) == DialogResult.Yes)
             {
                 try
                 {
                     SqlConnection.BeginTransaction();
                     SqlConnection.SetSqlParameters(new List<SqlParameter> {
-                        new SqlParameter("@dishName", $@"{DataTableRecipe.Rows[cell.RowIndex].ItemArray[0]}%"),
-                        new SqlParameter("@productName", $@"{DataTableProductOfRecipe.Rows[cell.RowIndex].ItemArray[0]}%")
+                        new SqlParameter("@dishName", $@"{cellRecipe.Value}%"),
+                        new SqlParameter("@productName", $@"{cellProduct.Value}%")
                     });
                     SqlConnection.ExecuteNonQuery(QueryDeleteProductFromDish);
                     SqlConnection.Commit();
                 }
                 catch (Exception exc)
                 {
-                    MessageBox.Show(exc.Message);
                     SqlConnection.RollBack();
+                    MessageBox.Show($"Не удалось удалить {cellProduct.Value} из {cellRecipe.Value} по причине:\n" + exc.Message);
                 }
                 finally
                 {

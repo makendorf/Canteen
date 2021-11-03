@@ -19,11 +19,11 @@ namespace Canteen
                                 "select prod.name as Продукт, Round(sum(Movement.quantity), 3) as КГ from Movement " +
                                 "left join ProductsList as prod on prod.Id = Movement.product " +
                                 "left join DishList as Dish on Dish.Id = Movement.dish " +
-                                "where type = (select top 1 Id from TypeOperation where name like @type) and date = @date and Dish.name like @dishName " +
+                                "where type = @type and date = @date and Dish.name like @dishName " +
                                 "group by prod.name " +
                                 "order by prod.name";
         private readonly string QueryUpdateMovementProductionProductAsComming =
-                                "select prod.name as Продукт, quantity as КГ from ProductsQuantity " +
+                                "select prod.name as Продукт, Round(quantity, 3) as КГ from ProductsQuantity " +
                                 "left join ProductsList as prod on prod.Id = ProductsQuantity.product_id " +
             "where ProductsQuantity.product_id = (select top 1 Id from ProductsList where name like @dishName)";
         private readonly string QueryUpdateInventirization =
@@ -132,44 +132,55 @@ namespace Canteen
         {
             DataTableMovementProductionProduct = new DataTable();
             movementProductionProductDataGrid.DataSource = new BindingSource(DataTableMovementProductionProduct, null);
-            string type = movementDataGrid.SelectedRows[0].Cells[0].Value.ToString().Trim();
+            
+            int type = 0;
+            string dishCellValue = movementDataGrid.SelectedRows[0].Cells[2].Value.ToString().Trim();
+            System.DateTime date = System.Convert.ToDateTime(movementDataGrid.SelectedRows[0].Cells[1].Value);
+            SqlConnection.SetSqlParameters(new System.Collections.Generic.List<SqlParameter>()
+            {
+                new SqlParameter("@typeName", movementDataGrid.SelectedRows[0].Cells[0].Value.ToString().Trim())
+            });
+            using (var reader = SqlConnection.ExecuteQuery("select Id from TypeOperation where name like @typeName"))
+            {
+                if (reader.HasRows)
+                {
+                    reader.Read();
+                    type = reader.GetInt32(0);
+                }
+            }
             switch (type)
             {
-                case "Без операции": { break; }
-                case "Производство (малый зал)":
+                case 0: { break; }
+                case 1:
                     {
                         DataAdapterMovementProductionProduct = SqlConnection.QueryForDataAdapter(QueryUpdateMovementProductionProduct);
-                        DataAdapterMovementProductionProduct.SelectCommand.Parameters.AddWithValue("@dishName", $@"%{movementDataGrid.SelectedRows[0].Cells[2].Value.ToString().Trim()}%");
-                        DataAdapterMovementProductionProduct.SelectCommand.Parameters.AddWithValue("@type", $@"%{movementDataGrid.SelectedRows[0].Cells[0].Value.ToString().Trim()}%");
-                        DataAdapterMovementProductionProduct.SelectCommand.Parameters.AddWithValue("@date", movementDataGrid.SelectedRows[0].Cells[1].Value);
+                        DataAdapterMovementProductionProduct.SelectCommand.Parameters.AddWithValue("@dishName", dishCellValue);
+                        DataAdapterMovementProductionProduct.SelectCommand.Parameters.AddWithValue("@type", type);
+                        DataAdapterMovementProductionProduct.SelectCommand.Parameters.AddWithValue("@date", date);
                         DataAdapterMovementProductionProduct.Fill(DataTableMovementProductionProduct);
                         DataTableMovementProductionProduct.Rows.Add("Итого:", SummWeighOnePerson());
                         break;
                     }
-                case "Производство (большой зал)": goto case "Производство (малый зал)";
-                case "Продажа (малый зал)": goto case "Производство (малый зал)";
-                case "Продажа (большой зал)": goto case "Производство (малый зал)";
-                case "Приход":
+                case 2: goto case 1;
+                case 3: goto case 1;
+                case 4: goto case 1;
+                case 5:
                     {
                         DataAdapterMovementProductionProduct = SqlConnection.QueryForDataAdapter(QueryUpdateMovementProductionProductAsComming);
-                        DataAdapterMovementProductionProduct.SelectCommand.Parameters.AddWithValue("@dishName", $@"%{movementDataGrid.SelectedRows[0].Cells[2].Value.ToString().Trim()}%");
-                        DataAdapterMovementProductionProduct.SelectCommand.Parameters.AddWithValue("@date", movementDataGrid.SelectedRows[0].Cells[1].Value);
+                        DataAdapterMovementProductionProduct.SelectCommand.Parameters.AddWithValue("@dishName", dishCellValue);
+                        DataAdapterMovementProductionProduct.SelectCommand.Parameters.AddWithValue("@date", date);
                         DataAdapterMovementProductionProduct.Fill(DataTableMovementProductionProduct);
                         break;
                     }
-                case "Перевеска": 
+                case 6: 
                     {
                         DataAdapterMovementProductionProduct = SqlConnection.QueryForDataAdapter(QueryUpdateInventirization);
-                        DataAdapterMovementProductionProduct.SelectCommand.Parameters.AddWithValue("@dishName", $@"%{movementDataGrid.SelectedRows[0].Cells[2].Value.ToString().Trim()}%");
-                        DataAdapterMovementProductionProduct.SelectCommand.Parameters.AddWithValue("@date", System.Convert.ToDateTime(movementDataGrid.SelectedRows[0].Cells[1].Value));
+                        DataAdapterMovementProductionProduct.SelectCommand.Parameters.AddWithValue("@dishName", dishCellValue);
+                        DataAdapterMovementProductionProduct.SelectCommand.Parameters.AddWithValue("@date", date);
                         DataAdapterMovementProductionProduct.Fill(DataTableMovementProductionProduct);
                         break; 
                     }
             }
-            
-            
-            
-           
         }
 
         private double SummWeighOnePerson()
@@ -186,32 +197,6 @@ namespace Canteen
         private void movementDataGrid_RowHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
         {
             UpdateDataTableMovementProductionProduct();
-        }
-
-        private void ButtonAddProduct_Click(object sender, System.EventArgs e)
-        {
-            AddProduct AddProduct = new AddProduct();
-            AddProduct.ShowDialog();
-        }
-
-        private void metroButton1_Click(object sender, System.EventArgs e)
-        {
-            ProductAndRecipe AddRecipe = new ProductAndRecipe();
-            AddRecipe.ShowDialog();
-        }
-
-        private void metroButton2_Click(object sender, System.EventArgs e)
-        {
-            ProductAndRecipe AddRecipe = new ProductAndRecipe();
-            AddRecipe.ShowDialog();
-            UpdateDataTableMovement();
-        }
-
-        private void metroButton3_Click(object sender, System.EventArgs e)
-        {
-            ProductionSale addProductionSaleForm = new ProductionSale();
-            addProductionSaleForm.ShowDialog();
-            UpdateDataTableMovement();
         }
 
         private void tabControl1_SelectedIndexChanged(object sender, System.EventArgs e)

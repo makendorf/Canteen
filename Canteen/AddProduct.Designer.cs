@@ -121,7 +121,7 @@ namespace Canteen
             this.metroPanel1.HorizontalScrollbarBarColor = true;
             this.metroPanel1.HorizontalScrollbarHighlightOnWheel = false;
             this.metroPanel1.HorizontalScrollbarSize = 10;
-            this.metroPanel1.Location = new System.Drawing.Point(23, 63);
+            this.metroPanel1.Location = new System.Drawing.Point(75, 63);
             this.metroPanel1.Name = "metroPanel1";
             this.metroPanel1.Size = new System.Drawing.Size(257, 100);
             this.metroPanel1.TabIndex = 5;
@@ -135,12 +135,12 @@ namespace Canteen
             this.GridViewProductList.Dock = System.Windows.Forms.DockStyle.Fill;
             this.GridViewProductList.Location = new System.Drawing.Point(0, 0);
             this.GridViewProductList.Name = "GridViewProductList";
-            this.GridViewProductList.Size = new System.Drawing.Size(263, 312);
+            this.GridViewProductList.Size = new System.Drawing.Size(371, 312);
             this.GridViewProductList.TabIndex = 6;
             // 
             // metroButton2
             // 
-            this.metroButton2.Location = new System.Drawing.Point(113, 169);
+            this.metroButton2.Location = new System.Drawing.Point(165, 169);
             this.metroButton2.Name = "metroButton2";
             this.metroButton2.Size = new System.Drawing.Size(75, 23);
             this.metroButton2.TabIndex = 7;
@@ -159,7 +159,7 @@ namespace Canteen
             this.metroPanel2.HorizontalScrollbarSize = 10;
             this.metroPanel2.Location = new System.Drawing.Point(23, 198);
             this.metroPanel2.Name = "metroPanel2";
-            this.metroPanel2.Size = new System.Drawing.Size(263, 312);
+            this.metroPanel2.Size = new System.Drawing.Size(371, 312);
             this.metroPanel2.TabIndex = 8;
             this.metroPanel2.VerticalScrollbarBarColor = true;
             this.metroPanel2.VerticalScrollbarHighlightOnWheel = false;
@@ -169,7 +169,7 @@ namespace Canteen
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(309, 518);
+            this.ClientSize = new System.Drawing.Size(417, 518);
             this.Controls.Add(this.metroPanel2);
             this.Controls.Add(this.metroButton2);
             this.Controls.Add(this.metroPanel1);
