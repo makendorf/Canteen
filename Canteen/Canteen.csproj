@@ -134,11 +134,23 @@
     <Compile Include="Report.Designer.cs">
       <DependentUpon>Report.cs</DependentUpon>
     </Compile>
+    <Compile Include="SelectCategory.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SelectCategory.Designer.cs">
+      <DependentUpon>SelectCategory.cs</DependentUpon>
+    </Compile>
     <Compile Include="SelectQuantity.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="SelectQuantity.Designer.cs">
       <DependentUpon>SelectQuantity.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SelectRecipe.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SelectRecipe.Designer.cs">
+      <DependentUpon>SelectRecipe.cs</DependentUpon>
     </Compile>
     <Compile Include="SQL.cs" />
     <Compile Include="Structur.cs" />
@@ -179,8 +191,14 @@
     <EmbeddedResource Include="Report.resx">
       <DependentUpon>Report.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="SelectCategory.resx">
+      <DependentUpon>SelectCategory.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="SelectQuantity.resx">
       <DependentUpon>SelectQuantity.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SelectRecipe.resx">
+      <DependentUpon>SelectRecipe.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">

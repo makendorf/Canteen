@@ -56,5 +56,41 @@ namespace Canteen
             GridViewProductList.DataSource = new BindingSource(DataTableCategory, null);
             UpdateDataTableCategory();
         }
+
+        private void GridViewProductList_CellMouseClick(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            if (metroCheckBox1.Checked)
+            {
+                try
+                {
+                    string product = GridViewProductList.SelectedCells[0].Value.ToString();
+                    var ChangeProduct = new SelectQuantity(product);
+                    ChangeProduct.Text = product;
+                    ChangeProduct.metroLabel1.Text = "Новое имя:";
+                    ChangeProduct.ShowDialog();
+                    if (ChangeProduct.DialogResult == DialogResult.OK)
+                    {
+                        SqlConnection.BeginTransaction();
+                        SqlConnection.SetSqlParameters(new List<SqlParameter>()
+                                    {
+                                        new SqlParameter("@name", ChangeProduct.ReturnValue),
+                                        new SqlParameter("@oldName", product)
+                                    });
+                        int countChange = SqlConnection.ExecuteNonQuery("update CategoryList set name = @name where name like @oldName");
+                        if (countChange <= 0)
+                        {
+                            throw new Exception("Ошибка. Изменено 0 записей. Обратитесь к администратору");
+                        }
+                        SqlConnection.Commit();
+                    }
+                    UpdateDataTableCategory();
+                }
+                catch (Exception exc)
+                {
+                    SqlConnection.RollBack();
+                    MessageBox.Show(exc.Message);
+                }
+            }
+        }
     }
 }

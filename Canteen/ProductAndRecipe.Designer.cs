@@ -128,6 +128,7 @@ namespace Canteen
             this.DataGridRecipe.Size = new System.Drawing.Size(244, 564);
             this.DataGridRecipe.TabIndex = 0;
             this.DataGridRecipe.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DataGridRecipe_CellClick);
+            this.DataGridRecipe.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DataGridRecipe_CellDoubleClick);
             this.DataGridRecipe.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.DataGridRecipe_CellValueChanged);
             this.DataGridRecipe.RowHeaderMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.RecipeDataGrid_RowHeaderMouseClick);
             // 
@@ -200,6 +201,7 @@ namespace Canteen
             // 
             // toolStripTextBox1
             // 
+            this.toolStripTextBox1.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.toolStripTextBox1.Name = "toolStripTextBox1";
             this.toolStripTextBox1.Size = new System.Drawing.Size(250, 25);
             this.toolStripTextBox1.TextChanged += new System.EventHandler(this.toolStripTextBox1_TextChanged);

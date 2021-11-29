@@ -13,7 +13,7 @@ namespace CanteenMonitor
             "left join DishList on DishList.Id = ProductionSale.dish where date = @date group by DishList.Name, date";
         private readonly DataTable DataTableProductList = new DataTable();
         private SqlDataAdapter DataAdapterProductList;
-        readonly System.Timers.Timer timer = new System.Timers.Timer(3600000);
+        readonly System.Timers.Timer timer = new System.Timers.Timer(1000);
         public Form1()
         {
             InitializeComponent();
@@ -37,18 +37,11 @@ namespace CanteenMonitor
                 DataAdapterProductList = SqlConnection.QueryForDataAdapter(QueryUpdateProductList);
                 DataAdapterProductList.SelectCommand.Parameters.AddWithValue("@date", DateTime.Now.ToShortDateString());
                 DataAdapterProductList.Fill(DataTableProductList);
-                metroGrid1.DefaultCellStyle.Font = new System.Drawing.Font("Microsoft Sans Serif", 24);
+                metroGrid1.DefaultCellStyle.Font = new System.Drawing.Font("Microsoft Sans Serif", 27);
                 metroGrid1.ColumnHeadersDefaultCellStyle.Font = new System.Drawing.Font("Microsoft Sans Serif", 27);
-                metroGrid1.Columns[1].Width = 800;
-                metroGrid1.Columns[0].Width = 200;
-                foreach (DataGridViewRow row in metroGrid1.Rows)
-                {
-                    row.Height = 50;
-                }
             }
             catch { }
         }
-
         private void UpdateDataTableProductList()
         {
             try

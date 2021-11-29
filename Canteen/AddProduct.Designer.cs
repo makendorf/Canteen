@@ -38,6 +38,7 @@ namespace Canteen
             this.GridViewProductList = new System.Windows.Forms.DataGridView();
             this.metroButton2 = new MetroFramework.Controls.MetroButton();
             this.metroPanel2 = new MetroFramework.Controls.MetroPanel();
+            this.metroCheckBox1 = new MetroFramework.Controls.MetroCheckBox();
             this.metroPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.GridViewProductList)).BeginInit();
             this.metroPanel2.SuspendLayout();
@@ -46,7 +47,7 @@ namespace Canteen
             // metroLabel1
             // 
             this.metroLabel1.AutoSize = true;
-            this.metroLabel1.Location = new System.Drawing.Point(3, 17);
+            this.metroLabel1.Location = new System.Drawing.Point(42, 7);
             this.metroLabel1.Name = "metroLabel1";
             this.metroLabel1.Size = new System.Drawing.Size(68, 19);
             this.metroLabel1.TabIndex = 0;
@@ -67,7 +68,7 @@ namespace Canteen
             this.metroTextBox1.CustomButton.UseSelectable = true;
             this.metroTextBox1.CustomButton.Visible = false;
             this.metroTextBox1.Lines = new string[0];
-            this.metroTextBox1.Location = new System.Drawing.Point(90, 13);
+            this.metroTextBox1.Location = new System.Drawing.Point(12, 29);
             this.metroTextBox1.MaxLength = 32767;
             this.metroTextBox1.Name = "metroTextBox1";
             this.metroTextBox1.PasswordChar = '\0';
@@ -85,7 +86,7 @@ namespace Canteen
             // metroLabel2
             // 
             this.metroLabel2.AutoSize = true;
-            this.metroLabel2.Location = new System.Drawing.Point(3, 64);
+            this.metroLabel2.Location = new System.Drawing.Point(230, 7);
             this.metroLabel2.Name = "metroLabel2";
             this.metroLabel2.Size = new System.Drawing.Size(71, 19);
             this.metroLabel2.TabIndex = 2;
@@ -95,15 +96,15 @@ namespace Canteen
             // 
             this.metroComboBox1.FormattingEnabled = true;
             this.metroComboBox1.ItemHeight = 23;
-            this.metroComboBox1.Location = new System.Drawing.Point(90, 54);
+            this.metroComboBox1.Location = new System.Drawing.Point(168, 29);
             this.metroComboBox1.Name = "metroComboBox1";
-            this.metroComboBox1.Size = new System.Drawing.Size(124, 29);
+            this.metroComboBox1.Size = new System.Drawing.Size(200, 29);
             this.metroComboBox1.TabIndex = 3;
             this.metroComboBox1.UseSelectable = true;
             // 
             // metroButton1
             // 
-            this.metroButton1.Location = new System.Drawing.Point(220, 56);
+            this.metroButton1.Location = new System.Drawing.Point(339, 3);
             this.metroButton1.Name = "metroButton1";
             this.metroButton1.Size = new System.Drawing.Size(29, 27);
             this.metroButton1.TabIndex = 4;
@@ -113,6 +114,7 @@ namespace Canteen
             // 
             // metroPanel1
             // 
+            this.metroPanel1.Controls.Add(this.metroButton2);
             this.metroPanel1.Controls.Add(this.metroComboBox1);
             this.metroPanel1.Controls.Add(this.metroButton1);
             this.metroPanel1.Controls.Add(this.metroLabel1);
@@ -121,9 +123,9 @@ namespace Canteen
             this.metroPanel1.HorizontalScrollbarBarColor = true;
             this.metroPanel1.HorizontalScrollbarHighlightOnWheel = false;
             this.metroPanel1.HorizontalScrollbarSize = 10;
-            this.metroPanel1.Location = new System.Drawing.Point(75, 63);
+            this.metroPanel1.Location = new System.Drawing.Point(23, 63);
             this.metroPanel1.Name = "metroPanel1";
-            this.metroPanel1.Size = new System.Drawing.Size(257, 100);
+            this.metroPanel1.Size = new System.Drawing.Size(371, 100);
             this.metroPanel1.TabIndex = 5;
             this.metroPanel1.VerticalScrollbarBarColor = true;
             this.metroPanel1.VerticalScrollbarHighlightOnWheel = false;
@@ -131,16 +133,20 @@ namespace Canteen
             // 
             // GridViewProductList
             // 
+            this.GridViewProductList.AllowUserToAddRows = false;
+            this.GridViewProductList.AllowUserToDeleteRows = false;
             this.GridViewProductList.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.GridViewProductList.Dock = System.Windows.Forms.DockStyle.Fill;
             this.GridViewProductList.Location = new System.Drawing.Point(0, 0);
             this.GridViewProductList.Name = "GridViewProductList";
+            this.GridViewProductList.ReadOnly = true;
             this.GridViewProductList.Size = new System.Drawing.Size(371, 312);
             this.GridViewProductList.TabIndex = 6;
+            this.GridViewProductList.CellMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.GridViewProductList_CellMouseClick);
             // 
             // metroButton2
             // 
-            this.metroButton2.Location = new System.Drawing.Point(165, 169);
+            this.metroButton2.Location = new System.Drawing.Point(151, 74);
             this.metroButton2.Name = "metroButton2";
             this.metroButton2.Size = new System.Drawing.Size(75, 23);
             this.metroButton2.TabIndex = 7;
@@ -165,13 +171,23 @@ namespace Canteen
             this.metroPanel2.VerticalScrollbarHighlightOnWheel = false;
             this.metroPanel2.VerticalScrollbarSize = 10;
             // 
+            // metroCheckBox1
+            // 
+            this.metroCheckBox1.AutoSize = true;
+            this.metroCheckBox1.Location = new System.Drawing.Point(282, 177);
+            this.metroCheckBox1.Name = "metroCheckBox1";
+            this.metroCheckBox1.Size = new System.Drawing.Size(112, 15);
+            this.metroCheckBox1.TabIndex = 9;
+            this.metroCheckBox1.Text = "редактирование";
+            this.metroCheckBox1.UseSelectable = true;
+            // 
             // AddProduct
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(417, 518);
+            this.Controls.Add(this.metroCheckBox1);
             this.Controls.Add(this.metroPanel2);
-            this.Controls.Add(this.metroButton2);
             this.Controls.Add(this.metroPanel1);
             this.Name = "AddProduct";
             this.Text = "Добавить продукт";
@@ -181,6 +197,7 @@ namespace Canteen
             ((System.ComponentModel.ISupportInitialize)(this.GridViewProductList)).EndInit();
             this.metroPanel2.ResumeLayout(false);
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -195,5 +212,6 @@ namespace Canteen
         private System.Windows.Forms.DataGridView GridViewProductList;
         private MetroFramework.Controls.MetroButton metroButton2;
         private MetroFramework.Controls.MetroPanel metroPanel2;
+        private MetroFramework.Controls.MetroCheckBox metroCheckBox1;
     }
 }

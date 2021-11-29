@@ -398,7 +398,8 @@ namespace Canteen
                 }
                 else
                 {
-                    return false;
+                    //return false;
+                    return true;
                 }
             }
         }
@@ -568,7 +569,7 @@ namespace Canteen
                                                     new SqlParameter("@quantity", quantityKg),
                                                     new SqlParameter("@name", productId)
                                                 });
-                                                int countQ = SqlConnection.ExecuteNonQuery(QueryInsertQuantity);
+                                                int countQ = SqlConnection.ExecuteNonQuery(QueryInsertQuantityNotCheck);
                                                 if(countQ == 0)
                                                 {
                                                     throw new Exception($"На складе недостаточно продукта '{productName}': {quantityFact - quantityKg} ({quantityFact}).");

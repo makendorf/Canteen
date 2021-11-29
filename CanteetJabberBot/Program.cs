@@ -22,15 +22,19 @@ namespace CanteetJabberBot
             xmpp = new XmppClientConnection
             {
                 Server = hostname,
-                ConnectServer = hostname,
                 Port = 5222,
                 Username = username,
                 Password = password,
                 Resource = "Work",
-                Priority = 0
+                Priority = 0,
+                AutoResolveConnectServer = false,
+                UseStartTLS = true,
+                
             };
             xmpp.Open();
-
+            Console.WriteLine(xmpp.ClientVersion);
+            Console.WriteLine(xmpp.StreamVersion);
+            Console.WriteLine(xmpp.MyJID);
             xmpp.OnLogin += new ObjectHandler(OnLoginEvent);
             xmpp.OnMessage += new MessageHandler(xmpp_OnMessage);
             xmpp.OnError += new ErrorHandler(xmpp_OnError);

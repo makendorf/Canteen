@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Data.SqlClient;
 
-namespace Canteen
+namespace CanteenMonitorAndroid
 {
     public class SQL
     {
@@ -24,7 +24,7 @@ namespace Canteen
         }
         private string GetConnectionString()
         {
-            string connString = Properties.Settings.Default.canteenConnectionString;
+            string connString = "Password=canteen;Persist Security Info=True;User ID=canteen;Initial Catalog=canteen;Data Source=172.16.0.22";
             //var connString = Properties.Settings.Default.canteenTestConnectionString;
             return connString;
         }
@@ -98,10 +98,7 @@ namespace Canteen
         }
         public void Close()
         {
-            if (SqlConnection.State != System.Data.ConnectionState.Closed)
-            {
-                SqlConnection.Close();
-            }
+            SqlConnection.Close();
         }
     }
 }

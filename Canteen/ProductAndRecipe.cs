@@ -15,7 +15,7 @@ namespace Canteen
         private readonly string QuerySearchRecipe =
                                 "select name as Блюдо from DishList where name like @name order by name";
         private readonly string QueryUpdateProductOfRecipe =
-                                "select products.name as Продукт, RecipeList.norm as 'Норма (кг/1 порция)' from RecipeList " +
+                                "select products.name as Продукт, RecipeList.norm as 'Норма (кг/1 порция)', products.Id from RecipeList " +
                                 "left join DishList as dishs on dishs.Id = RecipeList.dish " +
                                 "left join ProductsList as products on products.Id = RecipeList.product " +
                                 "where RecipeList.dish = (select top 1 Id from DishList where name like @nameDish) " +
@@ -56,6 +56,7 @@ namespace Canteen
             DataGridProduct.DataSource = new BindingSource(DataTableProductOfRecipe, null);
             DataGridRecipe.DataSource = new BindingSource(DataTableRecipe, null);
             DataGridRecipe.ReadOnly = DataGridProduct.ReadOnly = true;
+            DataGridProduct.AllowUserToAddRows = false;
             UpdateDataTableRecipe();
         }
 
@@ -118,31 +119,43 @@ namespace Canteen
         private void ProductDataGrid_CellValueChanged(object sender, DataGridViewCellEventArgs e)
         {
             DataGridViewCell cell = DataGridProduct.CurrentCell;
-            switch (cell.ColumnIndex)
+            try
             {
-                case 0:
+                if (DataGridProduct.Rows[DataGridProduct.Rows.Count].Cells[0].ToString() != "" && DataGridProduct.Rows[DataGridProduct.Rows.Count].Cells[1].ToString() != "")
+                {
+                    switch (cell.ColumnIndex)
                     {
-                        SqlConnection.SetSqlParameters(new List<SqlParameter> {
-                            new SqlParameter("@oldName", $@"{DataTableProductLast.Rows[cell.RowIndex].ItemArray[0]}%"),
-                            new SqlParameter("@newName", $@"{cell.Value}")
-                        });
-                        SqlConnection.ExecuteNonQuery(QueryUpdateValueProductName);
-                        UpdateDataTableProduct();
-                        DataTableProductLast = DataTableProductOfRecipe;
-                        break;
+                        case 0:
+                            {
+                                SqlConnection.SetSqlParameters(new List<SqlParameter> {
+                                        new SqlParameter("@oldName", $@"{DataTableProductLast.Rows[cell.RowIndex].ItemArray[0]}%"),
+                                        new SqlParameter("@newName", $@"{cell.Value}")
+                                });
+                                SqlConnection.ExecuteNonQuery(QueryUpdateValueProductName);
+                                UpdateDataTableProduct();
+                                DataTableProductLast = DataTableProductOfRecipe;
+
+                                break;
+                            }
+                        case 1:
+                            {
+                                SqlConnection.SetSqlParameters(new List<SqlParameter> {
+                                        new SqlParameter("@newNorm", DataTableProductLast.Rows[cell.RowIndex].ItemArray[1]),
+                                        new SqlParameter("@nameProduct", $@"{DataGridProduct.Rows[cell.RowIndex].Cells[0].Value}"),
+                                        new SqlParameter("@nameDish", $@"{DataGridRecipe.SelectedRows[0].Cells[0].Value}")
+                                });
+                                int q = SqlConnection.ExecuteNonQuery(QueryUpdateValueProductNorm);
+                                UpdateDataTableProduct();
+                                break;
+                            }
                     }
-                case 1:
-                    {
-                        SqlConnection.SetSqlParameters(new List<SqlParameter> {
-                            new SqlParameter("@newNorm", DataTableProductLast.Rows[cell.RowIndex].ItemArray[1]),
-                            new SqlParameter("@nameProduct", $@"{DataGridProduct.Rows[cell.RowIndex].Cells[0].Value}"),
-                            new SqlParameter("@nameDish", $@"{DataGridRecipe.SelectedRows[0].Cells[0].Value}")
-                         });
-                        int q = SqlConnection.ExecuteNonQuery(QueryUpdateValueProductNorm);
-                        UpdateDataTableProduct();
-                        break;
-                    }
+                }
             }
+            catch
+            {
+               
+            }
+            
         }
 
         private void metroButton1_Click(object sender, EventArgs e)
@@ -262,29 +275,33 @@ namespace Canteen
         private void DataGridProduct_CellClick(object sender, DataGridViewCellEventArgs e)
         {
             DataGridProduct.Rows[DataGridProduct.CurrentCell.RowIndex].Selected = true;
+            
         }
-
+        //TODO: ДОДЕЛАТЬ РЕДАКТИРОВАНИЕ РЕЦЕПТУРЫ
         private void metroCheckBox1_CheckedChanged(object sender, EventArgs e)
         {
             if (metroCheckBox1.Checked)
             {
                 metroButton4.Enabled = metroButton5.Enabled = true;
-                DataGridRecipe.ReadOnly = DataGridProduct.ReadOnly = false;
+                //DataGridProduct.AllowUserToAddRows = true;
             }
             else
             {
                 metroButton4.Enabled = metroButton5.Enabled = false;
-                DataGridRecipe.ReadOnly = DataGridProduct.ReadOnly = true;
+                //DataGridProduct.AllowUserToAddRows = false;
             }
         }
 
-        private void DataGridProduct_UserAddedRow(object sender, DataGridViewRowEventArgs e)
+        private void DataGridRecipe_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            DataGridViewCell cell0 = DataGridProduct.Rows[DataGridProduct.Rows.Count].Cells[0];
-            DataGridViewCell cell1 = DataGridProduct.Rows[DataGridProduct.Rows.Count].Cells[0];
-            if ((string)cell0.Value != "" && cell1.Value != null)
+            if (metroCheckBox1.Checked)
             {
-
+                SelectRecipe selectRecipeForm = new SelectRecipe();
+                selectRecipeForm.Text = DataGridRecipe.CurrentCell.Value.ToString();
+                selectRecipeForm.ShowDialog();
+                int idRow = DataGridRecipe.CurrentCell.RowIndex;
+                UpdateDataTableRecipe();
+                DataGridRecipe.Rows[idRow].Selected = true;
             }
         }
     }

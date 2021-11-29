@@ -18,9 +18,12 @@ namespace Canteen
             "values ((select top 1 Id from ProductsList where name like @name))";
         private readonly DataTable DataTableProductList = new DataTable();
         private SqlDataAdapter DataAdapterProductList;
-        public AddProduct()
+        private bool ReturnBack;
+        public string ProductValue = "";
+        public AddProduct(bool returnBack = false)
         {
             InitializeComponent();
+            ReturnBack = returnBack;
         }
         private void UpdateDataTableProductList()
         {
@@ -82,6 +85,67 @@ namespace Canteen
         {
             AddCategory addCategoryForm = new AddCategory();
             addCategoryForm.ShowDialog();
+        }
+
+        private void GridViewProductList_CellMouseClick(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            if (ReturnBack)
+            {
+                ProductValue = GridViewProductList.CurrentCell.Value.ToString();
+                Close();
+            }
+            if (metroCheckBox1.Checked)
+            {
+                switch (GridViewProductList.SelectedCells[0].ColumnIndex)
+                {
+                    case 0:
+                        {
+                            try
+                            {
+                                string product = GridViewProductList.SelectedCells[0].Value.ToString();
+                                var ChangeProduct = new SelectQuantity(product);
+                                ChangeProduct.Text = product;
+                                ChangeProduct.metroLabel1.Text = "Новое имя:";
+                                
+                                
+                                ChangeProduct.ShowDialog();
+                                if (ChangeProduct.DialogResult == DialogResult.OK)
+                                {
+                                    SqlConnection.BeginTransaction();
+                                    SqlConnection.SetSqlParameters(new List<SqlParameter>()
+                                    {
+                                        new SqlParameter("@name", ChangeProduct.ReturnValue),
+                                        new SqlParameter("@oldName", product)
+                                    });
+                                    int countChange = SqlConnection.ExecuteNonQuery("update ProductsList set name = @name where name like @oldName");
+                                    if (countChange <= 0)
+                                    {
+                                        throw new Exception("Ошибка. Изменено 0 записей. Обратитесь к администратору");
+                                    }
+                                    SqlConnection.Commit();
+                                }
+                                UpdateDataTableProductList();
+                            }
+                            catch(Exception exc)
+                            {
+                                SqlConnection.RollBack();
+                                MessageBox.Show(exc.Message);
+                            }
+                            
+                            break;
+                        }
+                    case 1:
+                        {
+                            string category = GridViewProductList.SelectedCells[0].Value.ToString();
+                            string product = GridViewProductList.Rows[GridViewProductList.SelectedCells[0].RowIndex].Cells[0].Value.ToString();
+                            var selectCategory = new SelectCategory(product, category);
+                            selectCategory.Text = product;
+                            selectCategory.ShowDialog();
+                            UpdateDataTableProductList();
+                            break;
+                        }
+                }
+            }
         }
     }
 }
